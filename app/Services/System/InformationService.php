@@ -48,8 +48,8 @@ class InformationService extends Service
         if (isset($data->from) && isset($data->to) && $data->from != "" && $data->to != "") {
             $from = Carbon::createFromFormat('Y-m-d H:i:s', $data->from . ' 00:00:00');
             $to = Carbon::createFromFormat('Y-m-d H:i:s', $data->to . ' 23:59:00');
-            $query->where('check_in', '>=', $from)
-                ->where('check_in', '<=', $to);
+            $query->whereRaw("convert_tz(check_in,'+00:00','+09:00') >= '".$from."'")
+                ->whereRaw("convert_tz(check_in,'+00:00','+09:00') <= '".$to."'");
         }
 
         if (isset($data['mansion_name']) && $data['mansion_name'] != "")  {
@@ -65,13 +65,13 @@ class InformationService extends Service
         if (isset($data['contractor_name']) && $data['contractor_name'] != "")  {
 
             $query->whereHas('mansion.contractor',function($q) use ($data){
-             $q->whereId($data['contractor_name']);
+                $q->whereId($data['contractor_name']);
             });
 
         }
 
         if ($pagination && \Request::route()->uri == 'system/info-display') {
-             return $query->with(['mansion','mansion.contractor','buildingAdmin'])->orderBy('id', 'DESC')->paginate(25);
+            return $query->with(['mansion','mansion.contractor','buildingAdmin'])->orderBy('id', 'DESC')->paginate(25);
         } else {
             return $query->with(['mansion','mansion.contractor','buildingAdmin'])->get();
         }
@@ -134,11 +134,11 @@ class InformationService extends Service
             }
             else
             {
-                $check_out = carbon::parse($request->check_out)->format('Y-m-d H:i:s');
+                $check_out = carbon::parse($request->check_out)->subHours(9)->format('Y-m-d H:i:s');
                 $request['check_out'] = $check_out;
             }
 
-            $request['check_in'] = carbon::parse($request->check_in)->format('Y-m-d H:i:s');
+            $request['check_in'] = carbon::parse($request->check_in)->subHours(9)->format('Y-m-d H:i:s');
             $data = $request->except('_token','mansion_name','building_admin_id','contractor_name','latitude','longitude');
 
             $info->update($data);

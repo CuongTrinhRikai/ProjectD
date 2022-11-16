@@ -94,8 +94,8 @@ class CheckInOutApiController extends ApiController
         //building list of user with related mansion and contractor
         $buildingIds = BuildingAdminMansion::where('building_admin_id', $request->user()->id)
             ->with('mansion')->get()->map(function ($item){
-            $item->mansion_id_name = $item->mansion->mansion_id;
-            $item->contractorId = $item->mansion->contractor->contractorId;
+                $item->mansion_id_name = $item->mansion->mansion_id;
+                $item->contractorId = $item->mansion->contractor->contractorId;
                 if(preg_match('~[0-9]+~', $item->contractorId)){
                     $item->contractorId = preg_replace( '/\D/', '', $item->contractorId);
                 }
@@ -110,7 +110,7 @@ class CheckInOutApiController extends ApiController
                 }
                 $item->contractorId = json_encode($item->contractorId);
                 return $item;
-        });
+            });
 
         if(preg_match('~[0-9]+~', $request->contractorId)){
             $contractor = preg_replace( '/\D/', '', $request->contractorId);
@@ -156,18 +156,18 @@ class CheckInOutApiController extends ApiController
             return $this->errorNotFound(frontTrans('このマンションが現在の物件にアサインされません。'));
         }
         else {
-            $startTime = Carbon::parse(now())->setTimezone(self::timezone)->startOfDay()->format(self::formatDate);
-            $endTime = Carbon::parse(now())->setTimezone(self::timezone)->endOfDay()->format(self::formatDate);
+            $startTime = Carbon::parse(now(), 'Asia/Tokyo')->addHour(9)->startOfDay()->format('Y-m-d H:i:s');
+            $endTime = Carbon::parse(now(), 'Asia/Tokyo')->addHour(9)->endOfDay()->format('Y-m-d H:i:s');
 
-            $samebuilding = CheckInCheckOut::where('check_in', '>=', $startTime)
-                ->where('check_in', '<=', $endTime)
+            $samebuilding = CheckInCheckOut::whereRaw("convert_tz(check_in,'+00:00','+09:00') >= '".$startTime."'")
+                ->whereRaw("convert_tz(check_in,'+00:00','+09:00') <= '".$endTime."'")
                 ->where('building_admin_id', $request->user()->id)
                 ->where('mansion_id', '!=', $request->mansion_id)
                 ->orderBy('check_in', 'DESC')
                 ->first();
             if ($samebuilding != null) {
-                $issamebuilding = CheckInCheckOut::where('check_in', '>=', $startTime)
-                    ->where('check_in', '<=', $endTime)
+                $issamebuilding = CheckInCheckOut::whereRaw("convert_tz(check_in,'+00:00','+09:00') >= '".$startTime."'")
+                    ->whereRaw("convert_tz(check_in,'+00:00','+09:00') <= '".$endTime."'")
                     ->where('building_admin_id', $request->user()->id)
                     ->where('mansion_id', $request->mansion_id)
                     ->where('business_category', $request->businessCategory)
@@ -198,8 +198,8 @@ class CheckInOutApiController extends ApiController
 
             } else {
                 $issamebuilding =
-                    CheckInCheckOut::where('check_in', '>=', $startTime)
-                        ->where('check_in', '<=', $endTime)
+                    CheckInCheckOut::whereRaw("convert_tz(check_in,'+00:00','+09:00') >= '" . $startTime . "'")
+                        ->whereRaw("convert_tz(check_in,'+00:00','+09:00') <= '" . $endTime . "'")
                         ->where('building_admin_id', $request->user()->id)
                         ->where('mansion_id', $request->mansion_id)
                         ->where('business_category', $request->businessCategory)
@@ -208,8 +208,8 @@ class CheckInOutApiController extends ApiController
                 if ($issamebuilding != null) {
                     return $this->errorForbidden(frontTrans('同日付に複数の時点でチェックインできません'));
                 } else {
-                    $checkintime = CheckInCheckOut::where('check_in', '>=', $startTime)
-                        ->where('check_in', '<=', $endTime)
+                    $checkintime = CheckInCheckOut::whereRaw("convert_tz(check_in,'+00:00','+09:00') >= '".$startTime."'")
+                        ->whereRaw("convert_tz(check_in,'+00:00','+09:00') <= '".$endTime."'")
                         ->where('mansion_id', $request->mansion_id)
                         ->where('building_admin_id', $request->user()->id)
                         ->where('business_category', $request->businessCategory)
@@ -238,11 +238,11 @@ class CheckInOutApiController extends ApiController
     public function businessCategory($businessCategory)
     {
 
-            $requestBusiness = json_encode($businessCategory);
-            $availableBusiness = json_encode(businessCategory($businessCategory));
-            if($businessCategory != null && $requestBusiness == $availableBusiness){
-                return true;
-            }
+        $requestBusiness = json_encode($businessCategory);
+        $availableBusiness = json_encode(businessCategory($businessCategory));
+        if($businessCategory != null && $requestBusiness == $availableBusiness){
+            return true;
+        }
 
     }
     /**
@@ -363,17 +363,17 @@ class CheckInOutApiController extends ApiController
         if ($lastCheckin == null) {
             return $this->errorForbidden(frontTrans('先にチェックインしてください。'));
         }
-        $latestCheckinTime = Carbon::parse($lastCheckin->check_in)->format(self::formatDate);
-        $validLatestCheckoutTime = Carbon::parse($lastCheckin->check_in)->startOfDay()->addDay(1)->addHour(3)->addMinute(59)->addSecond(59)->format(self::formatDate);
+        $latestCheckinTime = Carbon::parse($lastCheckin->check_in, 'Asia/Tokyo')->addHour(9);
+        $validLatestCheckoutTime = Carbon::parse($lastCheckin->check_in, 'Asia/Tokyo')->addHour(9)->startOfDay()->addDay(1)->addHour(3)->addMinute(59)->addSecond(59);
 
-        $startTime = Carbon::parse($lastCheckin->check_in)->startOfDay();
+        $startTime = Carbon::parse($lastCheckin->check_in, 'Asia/Tokyo')->startOfDay();
 
         $queryCheckinDetail = CheckInCheckOut::where('building_admin_id', $request->user()->id)
             ->where('mansion_id', $request->mansion_id)
             ->whereNull('check_out');
-        $queryChecklatest = CheckInCheckOut::where('check_in', '>=', Carbon::parse($startTime)->format(self::formatDate))
+        $queryChecklatest = CheckInCheckOut::where('check_in', '>=', Carbon::parse($startTime)->format('Y-m-d H:i:s'))
+            ->where('check_in', '<=', Carbon::parse($validLatestCheckoutTime)->format('Y-m-d H:i:s'))
             ->where('mansion_id', $request->mansion_id)
-            ->where('check_in', '<=', Carbon::parse($validLatestCheckoutTime)->format(self::formatDate))
             ->where('building_admin_id', $request->user()->id)
             ->whereNull('check_out');
 
@@ -382,33 +382,32 @@ class CheckInOutApiController extends ApiController
             $queryChecklatest->where('business_category', $request->businessCategory);
         }
 
-        $checkinDetail = $queryCheckinDetail->where('check_in', '>=', Carbon::parse($startTime)->format(self::formatDate))
-            ->where('check_in', '<=', Carbon::parse($validLatestCheckoutTime)->format(self::formatDate))
+        $checkinDetail = $queryCheckinDetail->where('check_in', '>=', Carbon::parse($startTime)->format('Y-m-d H:i:s'))
+            ->where('check_in', '<=', Carbon::parse($validLatestCheckoutTime)->format('Y-m-d H:i:s'))
             ->first();
         $checklatest = $queryChecklatest->orderBy('check_in', 'DESC')
             ->first();
         if ($checkinDetail == null) {
-                    return $this->errorForbidden(frontTrans('先にチェックインしてください。'));
-                }
+            return $this->errorForbidden(frontTrans('先にチェックインしてください。'));
+        }
         if ($checklatest->mansion_id != $request->mansion_id) {
-                    return $this->errorForbidden(frontTrans('チェックアウトできません。'));
-                }
+            return $this->errorForbidden(frontTrans('チェックアウトできません。'));
+        }
         if ($checklatest->check_out != null) {
             return $this->responseOk(frontTrans('Already Checkout from this Mansion.'));
-                }
+        }
 
-        if ($latestCheckinTime < $checkoutTime && $checkoutTime < $validLatestCheckoutTime ) {
+        if ($latestCheckinTime < $checkoutTime && $checkoutTime < $validLatestCheckoutTime) {
 
-                    $lastCheckin->check_out = Carbon::now()->setTimezone(self::timezone)->format(self::formatDate);
-                    $object = json_decode(json_encode($lastCheckin), true);
-                    $this->service->update($object, $lastCheckin->id);
-                    //event(new Checkin($checkInCheckOut));
-                    return $this->responseOk(frontTrans('Checked Out Successfully.!!!'));
-                }
-        else{
-                    return $this->errorForbidden(frontTrans('Please reload this page and check-in first.'));
+            $lastCheckin->check_out = Carbon::now()->format('Y-m-d H:i:s');
+            $object = json_decode(json_encode($lastCheckin), true);
+            $this->service->update($object, $lastCheckin->id);
+            //event(new Checkin($checkInCheckOut));
+            return $this->responseOk(frontTrans('Checked Out Successfully.!!!'));
+        } else {
+            return $this->errorForbidden(frontTrans('Please reload this page and check-in first.'));
 
-                }
+        }
     }
 
     /**
@@ -447,7 +446,7 @@ class CheckInOutApiController extends ApiController
         if ($Date != $validDate) {
             return $this->errorForbidden(frontTrans("有効な日付を入力してください。"));
         }
-       $requestedDate =$validDate;
+        $requestedDate =$validDate;
         $requestedMansionId = $request->query('id');
 
 
@@ -471,18 +470,16 @@ class CheckInOutApiController extends ApiController
         $countday = $week_start;
         $count = 0;
         do {
-            $nextday = date(self::formatYMD, strtotime("+1 day", strtotime($countday)));
-            $convertCountDay = date(self::formatDate, strtotime($countday));
-            $convertNextDay = date(self::formatDate, strtotime($nextday));
+            $nextday = date('Y-m-d', strtotime("+1 day", strtotime($countday)));
             if ($requestedMansionId == null || $requestedMansionId == "") {
                 $details = CheckInCheckOut::where('building_admin_id', $request->user()->id)
-                    ->where('check_in', '>=', $convertCountDay)
-                    ->where('check_in', '<', $convertNextDay)
+                    ->where('check_in', '>=', date('Y-m-d H:i:s', strtotime('-9 hours', strtotime($countday))))
+                    ->where('check_in', '<', date('Y-m-d H:i:s', strtotime('-9 hours', strtotime($nextday))))
                     ->get();
             } else {
                 $details = CheckInCheckOut::where('building_admin_id', $request->user()->id)
-                    ->where('check_in', '>=', $convertCountDay)
-                    ->where('check_in', '<', $convertNextDay)
+                    ->where('check_in', '>=', date('Y-m-d H:i:s', strtotime('-9 hours', strtotime($countday))))
+                    ->where('check_in', '<', date('Y-m-d H:i:s', strtotime('-9 hours', strtotime($nextday))))
                     ->where('mansion_id', $requestedMansionId)
                     ->get();
 
@@ -518,8 +515,8 @@ class CheckInOutApiController extends ApiController
                         "contractorId" => $detail->mansion->contractor->contractorId,
                         "mansionName" => $detail->mansion->mansion_name,
                         "mansionAddress" => $detail->mansion->address,
-                        "checkInTime" =>$detail->check_in == null ? $detail->check_in : Carbon::parse($detail->check_in)->format(self::formatDate), //yyyy-MM-dd
-                        "checkOutTime" =>$detail->check_out == null ? $detail->check_out :  Carbon::parse($detail->check_out)->format(self::formatDate), //yyyy-MM-dd
+                        "checkInTime" =>$detail->check_in == null ? $detail->check_in : japaneseDateTime($detail->check_in)->format('Y-m-d H:i:s'), //yyyy-MM-dd
+                        "checkOutTime" =>$detail->check_out == null ? $detail->check_out : japaneseDateTime($detail->check_out)->format('Y-m-d H:i:s'), //yyyy-MM-dd
                         "latitude" => $detail->latitude,
                         "longitude" => $detail->longitude,
                         "businessCategory" => $detail->business_category
@@ -592,25 +589,25 @@ class CheckInOutApiController extends ApiController
 
         $getAttendanceRecord = function ($date) use($users){
             return CheckInCheckOut::
-            whereRaw("DATE_FORMAT(DATE(check_in),'%Y-%m-%d')='".$date."'")
+            whereRaw("DATE_FORMAT(DATE(convert_tz(check_in,'+00:00','+09:00')),'%Y-%m-%d')='".$date."'")
                 ->where('building_admin_id', $users)
                 ->orderBy('check_in', 'DESC')->get();
         };
 
         $attendance = $getAttendanceRecord($todayDate);
-        $previousDate = Carbon::parse($todayDate)->setTimezone(self::timezone)->subDay(1)->format(self::formatYMD);
+        $previousDate = Carbon::parse($todayDate, 'UTC')->subDay(1)->format('Y-m-d');
 
         $previousAttendance = $getAttendanceRecord($previousDate);
         if($attendance->toArray() == null && $previousAttendance->toArray() != null){
             $dataAttendance = [];
             $time = null;
             foreach ($previousAttendance as $value) {
-                $allowedCheckOutTime = Carbon::parse($value->check_in)->addDay(1)->startOfDay()->addHour(4)->subSecond(1);
+                $allowedCheckOutTime = Carbon::parse($value->check_in, 'Asia/Tokyo')->addHour(9)->addDay(1)->startOfDay()->addHour(4)->subSecond(1);
                 if ($value->check_in != null && $value->check_out == null) {
                     $now = Carbon::now()->setTimezone(self::timezone)->format(self::formatDate);
                     if ($allowedCheckOutTime >= $now) {
                         $dataAttendance[] = $value;
-                        $time = Carbon::parse($value->check_in)->subDay(1)->format(self::formatYMD);
+                        $time = $getAttendanceRecord(Carbon::parse($value->check_in, 'Asia/Tokyo')->addHour(9)->subDay(1)->format('Y-m-d'));
                     }
                 }
             }
@@ -637,9 +634,9 @@ class CheckInOutApiController extends ApiController
             foreach ($attendance as $value){
                 if (isset($value) && !is_null($value->check_in) && !is_null($value->check_out)){
                     $hasCheckInToday = false;
-                    $timeDate = Carbon::parse($value->check_in)->format(self::formatYMD);
+                    $timeDate = Carbon::parse($value->check_in, 'Asia/Tokyo')->format(self::formatYMD);
                 } else{
-                    $timeDate = Carbon::parse($value->check_in)->format(self::formatYMD);
+                    $timeDate = Carbon::parse($value->check_in, 'Asia/Tokyo')->format(self::formatYMD);
                     $hasCheckInToday = true;
                     break;
                 }
@@ -687,11 +684,11 @@ class CheckInOutApiController extends ApiController
         }
 
         $responseData['data'] = [
-            'hasCheckInPreviousDay' => ($checkInPreviousDay != null && !in_array(null, $checkInPreviousDay)) ? true:false,
-            'hasCheckedOutPreviousDay' => ($checkOutPreviousDay != null && !in_array(null, $checkOutPreviousDay)) ? true:false,
-            'hasCheckInToday' => $hasCheckInToday,
-            'message' => $this->attendanceMessage($success, $statusSuccess, $forgot, $statusForgot,  $neither, $statusNeither, $message, $request)
-        ]+ $this->getMansionData($attendanceData);
+                'hasCheckInPreviousDay' => ($checkInPreviousDay != null && !in_array(null, $checkInPreviousDay)) ? true:false,
+                'hasCheckedOutPreviousDay' => ($checkOutPreviousDay != null && !in_array(null, $checkOutPreviousDay)) ? true:false,
+                'hasCheckInToday' => $hasCheckInToday,
+                'message' => $this->attendanceMessage($success, $statusSuccess, $forgot, $statusForgot,  $neither, $statusNeither, $message, $request)
+            ]+ $this->getMansionData($attendanceData);
         return response()->json($responseData);
     }
 
