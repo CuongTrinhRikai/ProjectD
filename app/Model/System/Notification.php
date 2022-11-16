@@ -22,7 +22,7 @@ class Notification extends Model
       protected static $logOnlyDirty = true;
 
       protected $fillable = [
-          'title', 'body', 'name_of_registrant','flag','building_admin_id','contractor_id','notification_id'
+          'title', 'body', 'name_of_registrant','flag','building_admin_id','contractor_id','notification_id', 'company_id'
       ];
 
       public function notificationbuildingAdmin()
