@@ -8,6 +8,7 @@ use Illuminate\Mail\Mailable;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Cookie;
 use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Support\Facades\Log;
 
 class CheckinEmail extends Mailable
 {
@@ -71,6 +72,11 @@ class CheckinEmail extends Mailable
                     '%check_in%' => $check_in,
 
                 ], 'Checkin', $this->locale);
+
+            Log::info('--- start'.__FUNCTION__);
+            Log::info('--- $data');
+            Log::info(json_encode($data['content']));
+            Log::info('--- end'.__FUNCTION__);
 
             return $this->text('system.mail.plain',$data);
         }
