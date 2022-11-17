@@ -49,12 +49,12 @@ class infoDisplayExport implements FromCollection,WithHeadings,WithMapping, Shou
     public function map($data): array
     {
 
-            if($data->check_out == null){
-                $checkOut = '';
-            }
-            else{
-                $checkOut = Carbon::parse($data->check_out);
-            }
+        if($data->check_out == null){
+            $checkOut = '';
+        }
+        else{
+            $checkOut = $data->check_out == 'N/A' ? $data->check_out :japaneseDateTime(Carbon::parse($data->check_out));
+        }
 
         return [
             $data->id,
@@ -63,7 +63,7 @@ class infoDisplayExport implements FromCollection,WithHeadings,WithMapping, Shou
             $data->buildingAdmin->username,
             $data->latitude,
             $data->longitude,
-            Carbon::parse($data->check_in),
+            japaneseDateTime(Carbon::parse($data->check_in)),
             $checkOut,
 
         ];

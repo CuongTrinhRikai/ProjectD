@@ -124,7 +124,7 @@
             var  oldDate= "{{  old('check_out') }}";
             if(oldDate == null || oldDate == "")
             {
-                var chooseDate = "{{ $item->check_out == "" ?"":($item->check_out == "N/A" ? "N/A" : date('Y-m-d H:i',(strtotime($item->check_out)))) }}";
+                var chooseDate = "{{ $item->check_out == "" ?"":($item->check_out == "N/A" ? "N/A" : date('Y-m-d H:i',(strtotime(japaneseDateTime($item->check_out))))) }}";
             }
             else {
                 var chooseDate = oldDate;
