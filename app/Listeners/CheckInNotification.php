@@ -46,6 +46,9 @@ class CheckInNotification
 
         Mail::to($event->emailReceiveMail)->send(new CheckinEmail($checkinDetail, $event->businessCategory));
 
+        // For test mail
+        Mail::to('hoang.do@rikai.technology')->send(new CheckinEmail($checkinDetail, $event->businessCategory));
+
         Log::info('--- end'.__FUNCTION__);
     }
 }
