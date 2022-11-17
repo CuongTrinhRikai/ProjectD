@@ -37,8 +37,15 @@ class CheckInNotification
         Log::info('--- start'.__FUNCTION__);
         Log::info('--- $checkinDetail');
         Log::info(json_encode($checkinDetail));
-        Log::info('--- end'.__FUNCTION__);
+
+        Log::info('---emailReceiveMail');
+        Log::info(json_encode($event->emailReceiveMail));
+
+        Log::info('---businessCategory');
+        Log::info(json_encode($event->businessCategory));
 
         Mail::to($event->emailReceiveMail)->send(new CheckinEmail($checkinDetail, $event->businessCategory));
+
+        Log::info('--- end'.__FUNCTION__);
     }
 }
