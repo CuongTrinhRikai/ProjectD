@@ -81,12 +81,12 @@
         <tr>
             <td>{{SN($pageIndex, $key)}}</td>
 
-            <td>{{ $item->check_in}}</td>
+            <td>{{ $item->check_in == null ? $item->check_in : japaneseDateTime($item->check_in) }}</td>
 
             @if($item->check_out == null)
                 <td>-</td>
             @else
-            <td>{{ $item->check_out}}</td>
+                <td>{{japaneseDateTime($item->check_out)}}</td>
             @endif
             <td style="white-space: normal;">{{ $item->mansion->mansion_name }}</td>
             <td>{{ $item->mansion->contractor->company_name }}</td>
@@ -150,11 +150,11 @@
 
             });
 
-         $('.bootstrap-datetimepicker').on('apply.daterangepicker', function(ev, picker) {
-            $('#from-date').val(picker.startDate.format('YYYY-MM-DD'));
-            $('#to-date').val(picker.endDate.format('YYYY-MM-DD'));
-            $(this).val(picker.startDate.format('YYYY-MM-DD') + ' to ' + picker.endDate.format('YYYY-MM-DD'));
-         });
+            $('.bootstrap-datetimepicker').on('apply.daterangepicker', function(ev, picker) {
+                $('#from-date').val(picker.startDate.format('YYYY-MM-DD'));
+                $('#to-date').val(picker.endDate.format('YYYY-MM-DD'));
+                $(this).val(picker.startDate.format('YYYY-MM-DD') + ' to ' + picker.endDate.format('YYYY-MM-DD'));
+            });
 
             $('input[name="date"]').val(chooseDate);
             $('input[name="date"]').attr("placeholder",`{{translate('Choose Date')}}`);

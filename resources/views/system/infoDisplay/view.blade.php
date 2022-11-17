@@ -40,7 +40,7 @@
                                                 {{translate('Check-In')}} :
                                             </label>
                                             <div class="col-sm-9 word_break">
-                                                {{$items->check_in}}
+                                                {{ $items->check_in == null ? $items->check_in : japaneseDateTime($items->check_in) }}
                                             </div>
                                         </div>
                                         <div class="form-group row" id="">
@@ -53,7 +53,7 @@
                                                 @if($items->check_out == null)
                                                 -
                                                 @else
-                                                {{ $items->check_out}}
+                                                {{ japaneseDateTime($items->check_out)}}
                                                 @endif
                                             </div>
                                         </div>

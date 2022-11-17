@@ -6,7 +6,7 @@
             {{translate('Check-In')}}
         </label>
         <div class="col-sm-6">
-            <input type="text" class="form-control bootstrap-datetimepicker" value="{{ old('check_in') ?? $item->check_in }}" id="check_in" placeholder="Check-In" name="check_in">
+            <input type="text" class="form-control bootstrap-datetimepicker" value="{{ old('check_in') ?? japaneseDateTime($item->check_in) }}" id="check_in" placeholder="Check-In" name="check_in">
             @error('check_in')
             <p class="invalid-text text-danger" style="text-align: left;font-size: 80%">{{translate($message)}}</p>
             @enderror
@@ -19,7 +19,7 @@
         </label>
         <div class="col-sm-6">
 
-            <input type="text" class="form-control bootstrap-datetimepicker1 @error('check_out') is-invalid @enderror" value="{{ $item->check_out == "" ?"":($item->check_out == "N/A" ? "N/A" : $item->check_out) }}" id="check_out" placeholder="{{translate('Check-Out')}}" name="check_out" autocomplete="off" readonly="readonly" style="cursor:pointer; background-color: #FFFFFF">
+            <input type="text" class="form-control bootstrap-datetimepicker1 @error('check_out') is-invalid @enderror" value="{{ $item->check_out == "" ?"":($item->check_out == "N/A" ? "N/A" : japaneseDateTime($item->check_out)) }}" id="check_out" placeholder="{{translate('Check-Out')}}" name="check_out" autocomplete="off" readonly="readonly" style="cursor:pointer; background-color: #FFFFFF">
             @error('check_out')
             <p class="invalid-text text-danger" style="text-align: left;font-size: 80%">{{translate($message)}}</p>
             @enderror
@@ -37,7 +37,7 @@
 @section('scripts')
 
     <?php
-    $validDate =  strtotime($item->check_in);
+    $validDate =  strtotime(japaneseDateTime($item->check_in));
     ?>
     <script type="text/javascript">
 
@@ -57,19 +57,19 @@
         $(function () {
             var dateToday = '{{ date('Y-m-d', $validDate) }}';
             var strToDate =new Date(new Date().toLocaleString("en-US", {timeZone: "Asia/Tokyo"}));
-          var fecha=  formatDate(strToDate);
+            var fecha=  formatDate(strToDate);
             if(dateToday ==fecha)
             {
-               var maxDate = strToDate;
+                var maxDate = strToDate;
             }
             else
             {
 
-            var dates =new Date(dateToday);
+                var dates =new Date(dateToday);
                 dates.setHours(23);
                 dates.setMinutes(59);
 
-            var maxDate = dates;
+                var maxDate = dates;
             }
 
             $('.bootstrap-datetimepicker').daterangepicker({
@@ -121,14 +121,14 @@
 
         $(function () {
 
-                var  oldDate= "{{  old('check_out') }}";
-                if(oldDate == null || oldDate == "")
-                {
-                    var chooseDate = "{{ $item->check_out == "" ?"":($item->check_out == "N/A" ? "N/A" : date('Y-m-d H:i',(strtotime($item->check_out)))) }}";
-                }
-                else {
-                    var chooseDate = oldDate;
-                }
+            var  oldDate= "{{  old('check_out') }}";
+            if(oldDate == null || oldDate == "")
+            {
+                var chooseDate = "{{ $item->check_out == "" ?"":($item->check_out == "N/A" ? "N/A" : date('Y-m-d H:i',(strtotime($item->check_out)))) }}";
+            }
+            else {
+                var chooseDate = oldDate;
+            }
 
             var dateToday = '{{ date('Y-m-d', $validDate) }}';
             var strToDate =new Date(new Date().toLocaleString("en-US", {timeZone: "Asia/Tokyo"}));
@@ -147,108 +147,108 @@
                 var maxDate = dates;
                 console.log(maxDate);
             }
-           if(chooseDate == null || chooseDate == "")
-           {
-               $('.bootstrap-datetimepicker1').daterangepicker({
-                   autoUpdateInput: false,
-                   defaultDate: false,
-                   singleDatePicker: true,
-                   timePicker: true,
-                   timePicker24Hour: true,
-                   autoClose: true,
-                   useCurrent: false,
-                   showDropDown: true,
-                   autoComplete: false,
-                   clearBtn: true,
-                   startDate: maxDate,
+            if(chooseDate == null || chooseDate == "")
+            {
+                $('.bootstrap-datetimepicker1').daterangepicker({
+                    autoUpdateInput: false,
+                    defaultDate: false,
+                    singleDatePicker: true,
+                    timePicker: true,
+                    timePicker24Hour: true,
+                    autoClose: true,
+                    useCurrent: false,
+                    showDropDown: true,
+                    autoComplete: false,
+                    clearBtn: true,
+                    startDate: maxDate,
 
-                   locale: {
-                       format: 'YYYY-MM-DD HH:mm',
-                       cancelLabel: `{{translate('Clear')}}`,
-                       applyLabel:  `{{translate('Apply')}}`,
-                       daysOfWeek: [
-                           "日",
-                           "月",
-                           "火",
-                           "水",
-                           "木",
-                           "金",
-                           "土"
-                       ],
-                       monthNames: [
-                           "1月",
-                           "2月",
-                           "3月",
-                           "4月",
-                           "5月",
-                           "6月",
-                           "7月",
-                           "8月",
-                           "9月",
-                           "10月",
-                           "11月",
-                           "12月"
-                       ],
-                   },
-                   minDate: dateToday,
-                   maxDate: maxDate,
+                    locale: {
+                        format: 'YYYY-MM-DD HH:mm',
+                        cancelLabel: `{{translate('Clear')}}`,
+                        applyLabel:  `{{translate('Apply')}}`,
+                        daysOfWeek: [
+                            "日",
+                            "月",
+                            "火",
+                            "水",
+                            "木",
+                            "金",
+                            "土"
+                        ],
+                        monthNames: [
+                            "1月",
+                            "2月",
+                            "3月",
+                            "4月",
+                            "5月",
+                            "6月",
+                            "7月",
+                            "8月",
+                            "9月",
+                            "10月",
+                            "11月",
+                            "12月"
+                        ],
+                    },
+                    minDate: dateToday,
+                    maxDate: maxDate,
 
-               });
-               $(".bootstrap-datetimepicker1").on('apply.daterangepicker', function(ev, picker) {
-                   $(this).val(picker.startDate.format('YYYY-MM-DD HH:mm'));
-               });
-           }
-           else
-               {
-                   $('.bootstrap-datetimepicker1').daterangepicker({
-                       autoUpdateInput: false,
-                       defaultDate: false,
-                       singleDatePicker: true,
-                       timePicker: true,
-                       timePicker24Hour: true,
-                       autoClose: true,
-                       useCurrent: false,
-                       showDropDown: true,
-                       autoComplete: false,
-                       clearBtn: true,
-                       //startDate: maxDate,
+                });
+                $(".bootstrap-datetimepicker1").on('apply.daterangepicker', function(ev, picker) {
+                    $(this).val(picker.startDate.format('YYYY-MM-DD HH:mm'));
+                });
+            }
+            else
+            {
+                $('.bootstrap-datetimepicker1').daterangepicker({
+                    autoUpdateInput: false,
+                    defaultDate: false,
+                    singleDatePicker: true,
+                    timePicker: true,
+                    timePicker24Hour: true,
+                    autoClose: true,
+                    useCurrent: false,
+                    showDropDown: true,
+                    autoComplete: false,
+                    clearBtn: true,
+                    //startDate: maxDate,
 
-                       locale: {
-                           format: 'YYYY-MM-DD HH:mm',
-                           cancelLabel: `{{translate('Clear')}}`,
-                           applyLabel:  `{{translate('Apply')}}`,
-                           daysOfWeek: [
-                               "日",
-                               "月",
-                               "火",
-                               "水",
-                               "木",
-                               "金",
-                               "土"
-                           ],
-                           monthNames: [
-                               "1月",
-                               "2月",
-                               "3月",
-                               "4月",
-                               "5月",
-                               "6月",
-                               "7月",
-                               "8月",
-                               "9月",
-                               "10月",
-                               "11月",
-                               "12月"
-                           ],
-                       },
-                       minDate: dateToday,
-                       maxDate: maxDate,
+                    locale: {
+                        format: 'YYYY-MM-DD HH:mm',
+                        cancelLabel: `{{translate('Clear')}}`,
+                        applyLabel:  `{{translate('Apply')}}`,
+                        daysOfWeek: [
+                            "日",
+                            "月",
+                            "火",
+                            "水",
+                            "木",
+                            "金",
+                            "土"
+                        ],
+                        monthNames: [
+                            "1月",
+                            "2月",
+                            "3月",
+                            "4月",
+                            "5月",
+                            "6月",
+                            "7月",
+                            "8月",
+                            "9月",
+                            "10月",
+                            "11月",
+                            "12月"
+                        ],
+                    },
+                    minDate: dateToday,
+                    maxDate: maxDate,
 
-                   });
-                   $(".bootstrap-datetimepicker1").on('apply.daterangepicker', function(ev, picker) {
-                       $(this).val(picker.startDate.format('YYYY-MM-DD HH:mm'));
-                   });
-               }
+                });
+                $(".bootstrap-datetimepicker1").on('apply.daterangepicker', function(ev, picker) {
+                    $(this).val(picker.startDate.format('YYYY-MM-DD HH:mm'));
+                });
+            }
 
             $('input[name="check_out"]').val(chooseDate);
 
@@ -267,6 +267,3 @@
     </script>
 
 @endsection
-
-
-
