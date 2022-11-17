@@ -31,7 +31,7 @@ class CheckInCheckOutService extends Service
         $data['mansion_id'] = $request['mansion_id'];
         $data['latitude'] = $request['latitude'];
         $data['longitude'] = $request['longitude'];
-        $data['check_in'] = Carbon::now()->setTimezone('Asia/Tokyo')->format('Y-m-d H:i:s');
+        $data['check_in'] = Carbon::now()->format('Y-m-d H:i:s');
         $data['business_category'] = isset($request['businessCategory']) ? $request['businessCategory']:null;
         $checkInData = $this->model->create($data);
 

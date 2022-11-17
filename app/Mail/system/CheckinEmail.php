@@ -42,7 +42,7 @@ class CheckinEmail extends Mailable
     {
 
         try{
-            $check_in = date('Y-m-d H:i:s', strtotime($this->checkinDetail->check_in));
+            $check_in = date('Y-m-d H:i:s', strtotime($this->checkinDetail->check_in . ' +9 hour'));
            $category = $this->businessCategory;
            $contractorId = $this->checkinDetail->mansion->contractor->contractorId;
             if(preg_match('~[0-9]+~', $contractorId)){
