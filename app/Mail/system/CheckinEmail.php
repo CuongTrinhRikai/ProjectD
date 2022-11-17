@@ -73,6 +73,11 @@ class CheckinEmail extends Mailable
 
                 ], 'Checkin', $this->locale);
 
+            Log::info('--- start'.__FUNCTION__);
+            Log::info('--- $data');
+            Log::info(json_encode($data['content']));
+            Log::info('--- end'.__FUNCTION__);
+
             return $this->text('system.mail.plain',$data);
         }
         catch(\Exception $e){
