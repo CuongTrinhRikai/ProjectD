@@ -33,9 +33,12 @@ class CheckInCheckOutService extends Service
         $data['latitude'] = $request['latitude'];
         $data['longitude'] = $request['longitude'];
         $data['check_in'] = Carbon::now()->format('Y-m-d H:i:s');
-        $data['business_category'] = isset($request['businessCategory']) ? $request['businessCategory']:null;
-
-
+        if (isset($request['businessCategory']) && !is_null($request['businessCategory'])) {
+            $data['business_category'] = $request['businessCategory'];
+        } else {
+            $dataBusinessCategory = \Auth::user()->business_category;
+            $data['business_category'] =  Business($dataBusinessCategory[0]);
+        }
         $checkInData = $this->model->create($data);
 
         Log::info('__start_log_'.__FUNCTION__);
