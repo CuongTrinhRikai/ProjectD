@@ -193,7 +193,7 @@ class CheckInOutApiController extends ApiController
                     $checkInCheckOut = $this->service->getCheckIn($request);
                     $emailCompany = Company::where('id', $request->company_id)->first();
                     $emailReceiveMail = $emailCompany->email;
-                    event(new Checkin($checkInCheckOut,$emailReceiveMail, $request->businessCategory));
+                    event(new Checkin($checkInCheckOut,$emailReceiveMail, $checkInCheckOut->business_category));
                     if($request->has('businessCategory')){
                         return $this->businessCategory($request->businessCategory) ? $this->responseOkWithFlag(frontTrans('Checked In Successfully!!!')): $this->responseOkWithFlagValue(frontTrans('Checked In Successfully!!!'), frontTrans('太陽ビルの管理者に「06-6392-3980」で連絡してください。'));
                     }
@@ -226,7 +226,7 @@ class CheckInOutApiController extends ApiController
                         $checkInCheckOut = $this->service->getCheckIn($request);
                         $emailCompany = Company::where('id', $request->company_id)->first();
                         $emailReceiveMail = $emailCompany->email;
-                        event(new Checkin($checkInCheckOut,$emailReceiveMail, $request->businessCategory));
+                        event(new Checkin($checkInCheckOut,$emailReceiveMail, $checkInCheckOut->business_category));
                         if($request->has('businessCategory')){
                             return $this->businessCategory($request->businessCategory) ? $this->responseOkWithFlag(frontTrans('Checked In Successfully!!!')): $this->responseOkWithFlagValue(frontTrans('Checked In Successfully!!!'), frontTrans('太陽ビルの管理者に「06-6392-3980」で連絡してください。'));
                         }
