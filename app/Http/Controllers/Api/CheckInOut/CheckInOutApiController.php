@@ -11,6 +11,7 @@ use DateTime;
 use Carbon\Carbon;
 use App\Events\Checkin;
 
+use Illuminate\Support\Facades\Log;
 use Lcobucci\JWT\Parser;
 use League\Fractal\Manager;
 use Illuminate\Http\Request;
@@ -91,6 +92,13 @@ class CheckInOutApiController extends ApiController
 
     public function postCheckIn(Request $request)
     {
+        Log::info('__start_log_'.__FUNCTION__);
+        Log::info('--------------------------------');
+        Log::info('all request from mobile');
+        Log::info(json_encode($request->all()));
+        Log::info('--------------------------------');
+        Log::info('__end_log_'.__FUNCTION__);
+
         //building list of user with related mansion and contractor
         $buildingIds = BuildingAdminMansion::where('building_admin_id', $request->user()->id)
             ->with('mansion')->get()->map(function ($item){
