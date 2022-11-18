@@ -92,13 +92,7 @@ class CheckInOutApiController extends ApiController
 
     public function postCheckIn(Request $request)
     {
-        Log::info('__start_log_'.__FUNCTION__);
-        Log::info('--------------------------------');
-        Log::info('all request from mobile');
-        Log::info(json_encode($request->except('user')));
-        Log::info('--------------------------------');
-        Log::info('__end_log_'.__FUNCTION__);
-
+        Log::info('Request from mobile ' . json_encode($request->except('user')) . '--Class : ' . __CLASS__ . ' --Function : ' . __FUNCTION__);
         //building list of user with related mansion and contractor
         $buildingIds = BuildingAdminMansion::where('building_admin_id', $request->user()->id)
             ->with('mansion')->get()->map(function ($item){
@@ -297,6 +291,7 @@ class CheckInOutApiController extends ApiController
 
     public function postCheckOut(Request $request)
     {
+        Log::info('Request from mobile ' . json_encode($request->except('user')) . '--Class : ' . __CLASS__ . ' --Function : ' . __FUNCTION__);
         $buildingIds = BuildingAdminMansion::where('building_admin_id', $request->user()->id)->with('mansion')->get()->map(function ($item){
             $item->mansion_id_name = $item->mansion->mansion_id;
             $item->contractorId = $item->mansion->contractor->contractorId;

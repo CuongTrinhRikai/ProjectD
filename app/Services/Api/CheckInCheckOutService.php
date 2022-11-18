@@ -40,17 +40,6 @@ class CheckInCheckOutService extends Service
             $data['business_category'] =  Business($dataBusinessCategory[0]);
         }
         $checkInData = $this->model->create($data);
-
-        Log::info('__start_log_'.__FUNCTION__);
-        Log::info('--------------------------------');
-        Log::info('data register checkin-checkouts : $data');
-        Log::info(json_encode($data));
-        Log::info('--------------------------------');
-        Log::info('data before save to DB checkin-checkouts : $checkInData');
-        Log::info(json_encode($checkInData));
-        Log::info('--------------------------------');
-        Log::info('__end_log_'.__FUNCTION__);
-
         return $checkInData;
     }
 
