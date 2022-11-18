@@ -95,7 +95,7 @@ class CheckInOutApiController extends ApiController
         Log::info('__start_log_'.__FUNCTION__);
         Log::info('--------------------------------');
         Log::info('all request from mobile');
-        Log::info(json_encode($request->all()));
+        Log::info(json_encode($request->except('user')));
         Log::info('--------------------------------');
         Log::info('__end_log_'.__FUNCTION__);
 
