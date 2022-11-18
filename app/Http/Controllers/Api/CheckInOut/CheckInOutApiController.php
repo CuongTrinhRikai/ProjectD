@@ -158,6 +158,13 @@ class CheckInOutApiController extends ApiController
             return $this->errorNotFound(frontTrans('このマンションが現在の物件にアサインされません。'));
         }
         else {
+            if (!isset($request['businessCategory']) || is_null($request['businessCategory'])) {
+                $dataBusinessCategory = $request->user()->business_category;
+                $request->merge([
+                    'businessCategory' => Business($dataBusinessCategory[0])
+                ]);
+            }
+
             $startTime = Carbon::parse(now(), 'Asia/Tokyo')->addHour(9)->startOfDay()->format('Y-m-d H:i:s');
             $endTime = Carbon::parse(now(), 'Asia/Tokyo')->addHour(9)->endOfDay()->format('Y-m-d H:i:s');
 
@@ -187,12 +194,10 @@ class CheckInOutApiController extends ApiController
                     $checkInCheckOut = $this->service->getCheckIn($request);
                     $emailCompany = Company::where('id', $request->company_id)->first();
                     $emailReceiveMail = $emailCompany->email;
-                    event(new Checkin($checkInCheckOut,$emailReceiveMail, $checkInCheckOut->business_category));
-                    if($request->has('businessCategory')){
-                        return $this->businessCategory($request->businessCategory) ? $this->responseOkWithFlag(frontTrans('Checked In Successfully!!!')): $this->responseOkWithFlagValue(frontTrans('Checked In Successfully!!!'), frontTrans('太陽ビルの管理者に「06-6392-3980」で連絡してください。'));
-                    }
-                    else
-                    {
+                    event(new Checkin($checkInCheckOut, $emailReceiveMail, $checkInCheckOut->business_category));
+                    if ($request->has('businessCategory') && !is_null($request->businessCategory)) {
+                        return $this->businessCategory($request->businessCategory) ? $this->responseOkWithFlag(frontTrans('Checked In Successfully!!!')) : $this->responseOkWithFlagValue(frontTrans('Checked In Successfully!!!'), frontTrans('太陽ビルの管理者に「06-6392-3980」で連絡してください。'));
+                    } else {
                         return $this->responseOk(frontTrans('Checked In Successfully!!!'));
                     }
                 }
@@ -220,12 +225,10 @@ class CheckInOutApiController extends ApiController
                         $checkInCheckOut = $this->service->getCheckIn($request);
                         $emailCompany = Company::where('id', $request->company_id)->first();
                         $emailReceiveMail = $emailCompany->email;
-                        event(new Checkin($checkInCheckOut,$emailReceiveMail, $checkInCheckOut->business_category));
-                        if($request->has('businessCategory')){
-                            return $this->businessCategory($request->businessCategory) ? $this->responseOkWithFlag(frontTrans('Checked In Successfully!!!')): $this->responseOkWithFlagValue(frontTrans('Checked In Successfully!!!'), frontTrans('太陽ビルの管理者に「06-6392-3980」で連絡してください。'));
-                        }
-                        else
-                        {
+                        event(new Checkin($checkInCheckOut, $emailReceiveMail, $checkInCheckOut->business_category));
+                        if ($request->has('businessCategory') && !is_null($request->businessCategory)) {
+                            return $this->businessCategory($request->businessCategory) ? $this->responseOkWithFlag(frontTrans('Checked In Successfully!!!')) : $this->responseOkWithFlagValue(frontTrans('Checked In Successfully!!!'), frontTrans('太陽ビルの管理者に「06-6392-3980」で連絡してください。'));
+                        } else {
                             return $this->responseOk(frontTrans('Checked In Successfully!!!'));
                         }
                     }
@@ -358,7 +361,13 @@ class CheckInOutApiController extends ApiController
         $queryLastCheckin  = CheckInCheckOut::where('building_admin_id', $request->user()->id)
             ->where('mansion_id', $request->mansion_id)
             ->whereNull('check_out');
-        if (isset($request->version_app) && version_compare($request->version_app, \Config::get('constants.VERSION_APP'), '>=')){
+        if (!$request->has('businessCategory') || is_null($request->businessCategory)) {
+            $listBusinessCategory = Auth::user()->business_category;
+            $request->merge([
+                'businessCategory'=>Business($listBusinessCategory[0])
+            ]);
+        }
+        if (isset($request->version_app) && version_compare($request->version_app, \Config::get('constants.VERSION_APP'), '>=')) {
             $queryLastCheckin->where('business_category', $request->businessCategory);
         }
         $lastCheckin = $queryLastCheckin->orderBy('check_in', 'DESC')
