@@ -8,6 +8,7 @@ use App\Model\System\Mansion;
 use App\Services\Service;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 class CheckInCheckOutService extends Service
 {
@@ -33,7 +34,19 @@ class CheckInCheckOutService extends Service
         $data['longitude'] = $request['longitude'];
         $data['check_in'] = Carbon::now()->format('Y-m-d H:i:s');
         $data['business_category'] = isset($request['businessCategory']) ? $request['businessCategory']:null;
+
+
         $checkInData = $this->model->create($data);
+
+        Log::info('__start_log_'.__FUNCTION__);
+        Log::info('--------------------------------');
+        Log::info('data register checkin-checkouts : $data');
+        Log::info(json_encode($data));
+        Log::info('--------------------------------');
+        Log::info('data before save to DB checkin-checkouts : $checkInData');
+        Log::info(json_encode($checkInData));
+        Log::info('--------------------------------');
+        Log::info('__end_log_'.__FUNCTION__);
 
         return $checkInData;
     }
