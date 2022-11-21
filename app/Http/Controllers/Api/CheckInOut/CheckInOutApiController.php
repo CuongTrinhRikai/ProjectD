@@ -158,11 +158,14 @@ class CheckInOutApiController extends ApiController
             return $this->errorNotFound(frontTrans('このマンションが現在の物件にアサインされません。'));
         }
         else {
+            // Get business category from building admin when QR code without business category
+            $changeBusinessCategory = false;
             if (!isset($request['businessCategory']) || is_null($request['businessCategory'])) {
                 $dataBusinessCategory = $request->user()->business_category;
                 $request->merge([
                     'businessCategory' => Business($dataBusinessCategory[0])
                 ]);
+                $changeBusinessCategory = true;
             }
 
             $startTime = Carbon::parse(now(), 'Asia/Tokyo')->addHour(9)->startOfDay()->format('Y-m-d H:i:s');
@@ -195,8 +198,11 @@ class CheckInOutApiController extends ApiController
                     $emailCompany = Company::where('id', $request->company_id)->first();
                     $emailReceiveMail = $emailCompany->email;
                     event(new Checkin($checkInCheckOut, $emailReceiveMail, $checkInCheckOut->business_category));
-                    if ($request->has('businessCategory') && !is_null($request->businessCategory)) {
-                        return $this->businessCategory($request->businessCategory) ? $this->responseOkWithFlag(frontTrans('Checked In Successfully!!!')) : $this->responseOkWithFlagValue(frontTrans('Checked In Successfully!!!'), frontTrans('太陽ビルの管理者に「06-6392-3980」で連絡してください。'));
+                    if ($request->has('businessCategory')) {
+                        if ($this->businessCategory($request->businessCategory) && !$changeBusinessCategory){
+                            $this->responseOkWithFlag(frontTrans('Checked In Successfully!!!'));
+                        }
+                        return $this->responseOkWithFlagValue(frontTrans('Checked In Successfully!!!'), frontTrans('太陽ビルの管理者に「06-6392-3980」で連絡してください。'));
                     } else {
                         return $this->responseOk(frontTrans('Checked In Successfully!!!'));
                     }
@@ -226,8 +232,11 @@ class CheckInOutApiController extends ApiController
                         $emailCompany = Company::where('id', $request->company_id)->first();
                         $emailReceiveMail = $emailCompany->email;
                         event(new Checkin($checkInCheckOut, $emailReceiveMail, $checkInCheckOut->business_category));
-                        if ($request->has('businessCategory') && !is_null($request->businessCategory)) {
-                            return $this->businessCategory($request->businessCategory) ? $this->responseOkWithFlag(frontTrans('Checked In Successfully!!!')) : $this->responseOkWithFlagValue(frontTrans('Checked In Successfully!!!'), frontTrans('太陽ビルの管理者に「06-6392-3980」で連絡してください。'));
+                        if ($request->has('businessCategory')) {
+                            if ($this->businessCategory($request->businessCategory) && !$changeBusinessCategory){
+                                return $this->responseOkWithFlag(frontTrans('Checked In Successfully!!!'));
+                            }
+                            return $this->responseOkWithFlagValue(frontTrans('Checked In Successfully!!!'), frontTrans('太陽ビルの管理者に「06-6392-3980」で連絡してください。'))
                         } else {
                             return $this->responseOk(frontTrans('Checked In Successfully!!!'));
                         }
