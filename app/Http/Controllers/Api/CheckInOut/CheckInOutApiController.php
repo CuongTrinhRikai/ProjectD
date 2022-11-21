@@ -236,7 +236,7 @@ class CheckInOutApiController extends ApiController
                             if ($this->businessCategory($request->businessCategory) && !$changeBusinessCategory){
                                 return $this->responseOkWithFlag(frontTrans('Checked In Successfully!!!'));
                             }
-                            return $this->responseOkWithFlagValue(frontTrans('Checked In Successfully!!!'), frontTrans('太陽ビルの管理者に「06-6392-3980」で連絡してください。'))
+                            return $this->responseOkWithFlagValue(frontTrans('Checked In Successfully!!!'), frontTrans('太陽ビルの管理者に「06-6392-3980」で連絡してください。'));
                         } else {
                             return $this->responseOk(frontTrans('Checked In Successfully!!!'));
                         }
