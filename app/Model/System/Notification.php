@@ -38,6 +38,13 @@ class Notification extends Model
         return BuildingAdmin::select(DB::raw('CAST(id AS CHAR) AS building_id'))-> where('contractor_id', $contractor)->pluck('building_id');
     }
 
+    public  static function getBuildingAdminFromCompany($company_id)
+    {
+        return BuildingAdmin::select(DB::raw('CAST(id AS CHAR) AS building_id'))->whereHas('contractor', function ($query) use ($company_id) {
+            $query->where('company_id', $company_id);
+        })->pluck('building_id');
+    }
+
 
 
     //   protected static function boot()
