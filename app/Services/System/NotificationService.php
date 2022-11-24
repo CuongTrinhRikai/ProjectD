@@ -163,12 +163,6 @@ class NotificationService extends Service
                     }
                 } else {
                     $admin = Notification::getBuildingAdminFromCompany($request->company_id)->toArray();
-
-                    Log::info('------start--------'.__CLASS__);
-                    Log::info('------company_id--------: '. $request->company_id);
-                    Log::info('------admin--------: '. json_encode($admin));
-                    Log::info('------end--------'.__CLASS__);
-
                     $data = $request->except('_token', 'contractor_id', 'building_admin_id');
                     $request->contractor_id = null;
                     $request->building_admin_id = null;
