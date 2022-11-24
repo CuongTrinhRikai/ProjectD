@@ -38,13 +38,13 @@ class NotificationController extends ApiController
     {
 
         $userID = $request->user->id;
-
         $limit = $request->query('limit');
-    //   dd( Notification::with('notificationbuildingAdmin')->get());
         try {
-            $notification = Notification::whereHas('notificationbuildingAdmin', function ($item) use ($userID) {
-                return  $item->where('building_admin_id', $userID);
-            })->orwhere('flag', 1)->orderBy('id', 'DESC')->paginate($limit ?? 25);
+            $notification = Notification::where('company_id', $request->company_id)->where(function ($query) use ($userID){
+                $query->whereHas('notificationbuildingAdmin', function ($item) use ($userID) {
+                    return  $item->where('building_admin_id', $userID);
+                })->orwhere('flag', 1);
+            })->orderBy('id', 'DESC')->paginate($limit ?? 25);
 
             return $this->respondWithCollection($notification, new NotificationTransformer, 'notification');
         } catch (\Exception $e) {
