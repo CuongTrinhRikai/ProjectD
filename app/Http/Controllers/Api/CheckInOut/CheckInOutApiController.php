@@ -385,7 +385,7 @@ class CheckInOutApiController extends ApiController
             return $this->errorForbidden(frontTrans('先にチェックインしてください。'));
         }
         $latestCheckinTime = Carbon::parse($lastCheckin->check_in, 'Asia/Tokyo')->addHour(9);
-        $validLatestCheckoutTime = Carbon::parse($lastCheckin->check_in, 'Asia/Tokyo')->addHour(9)->startOfDay()->addDay(1)->addHour(3)->addMinute(59)->addSecond(59);
+        $validLatestCheckoutTime = Carbon::parse($lastCheckin->check_in, 'Asia/Tokyo')->addHour(9)->endOfDay()->addDay(7);
 
         $startTime = Carbon::parse($lastCheckin->check_in, 'Asia/Tokyo')->startOfDay();
 
@@ -647,29 +647,42 @@ class CheckInOutApiController extends ApiController
         return $this->attendanceResponse($attendance,$previousAttendance, $request);
     }
 
-    public function attendanceResponse($attendance, $previousAttendance, $request){
-        $hasCheckInToday = false;
-        $attendanceData = null;
-        if ($attendance){
-            $timeDate = null;
-            foreach ($attendance as $value){
-                if (isset($value) && !is_null($value->check_in) && !is_null($value->check_out)){
-                    $hasCheckInToday = false;
-                    $timeDate = Carbon::parse($value->check_in, 'Asia/Tokyo')->format(self::formatYMD);
-                } else{
-                    $timeDate = Carbon::parse($value->check_in, 'Asia/Tokyo')->format(self::formatYMD);
-                    $hasCheckInToday = true;
-                    break;
-                }
-            }
-            $attendanceData = CheckInCheckOut::
-            whereRaw("DATE_FORMAT(DATE(check_in),'%Y-%m-%d')='".$timeDate."'")
-                ->where('building_admin_id', $request->user()->id)
-                ->distinct('mansion_id')
-                ->whereNull('check_out')
-                ->orderBy('check_in', 'DESC')
-                ->first();
-        }
+    public function attendanceResponse($attendance, $previousAttendance, $request)
+    {
+        $dateNow = Carbon::parse($request->input_date, 'Asia/Tokyo')->format('Y-m-d');
+        $diffNow = Carbon::parse($request->input_date, 'Asia/Tokyo')->subDays(7)->format('Y-m-d');
+
+        $checkOuts = CheckInCheckOut::
+        where('building_admin_id', $request->user()->id)
+            ->whereRaw("DATE_FORMAT(DATE(convert_tz(check_in,'+00:00','+09:00')),'%Y-%m-%d') >='" . $diffNow . "'")
+            ->whereRaw("DATE_FORMAT(DATE(convert_tz(check_in,'+00:00','+09:00')),'%Y-%m-%d') <='" . $dateNow . "'")
+            ->whereNull('check_out')
+            ->get()->toArray();
+
+//        $hasCheckInToday = false;
+//        $attendanceData = null;
+//        if ($attendance) {
+//            $timeDate = null;
+//            foreach ($attendance as $value) {
+//                if (isset($value) && !is_null($value->check_in) && !is_null($value->check_out)) {
+//                    $hasCheckInToday = false;
+//                    $timeDate = Carbon::parse($value->check_in, 'Asia/Tokyo')->format(self::formatYMD);
+//                } else {
+//                    $timeDate = Carbon::parse($value->check_in, 'Asia/Tokyo')->format(self::formatYMD);
+//                    $hasCheckInToday = true;
+//                    break;
+//                }
+//            }
+//        }
+
+        $attendanceData = CheckInCheckOut::
+        where('building_admin_id', $request->user()->id)
+            ->whereRaw("DATE_FORMAT(DATE(convert_tz(check_in,'+00:00','+09:00')),'%Y-%m-%d') >='" . $diffNow . "'")
+            ->whereRaw("DATE_FORMAT(DATE(convert_tz(check_in,'+00:00','+09:00')),'%Y-%m-%d') <='" . $dateNow . "'")
+            ->distinct('mansion_id')
+            ->whereNull('check_out')
+            ->orderBy('check_in', 'DESC')
+            ->first();
         $checkInPreviousDay = [];
         $checkOutPreviousDay = [];
         $message = [];
@@ -679,23 +692,21 @@ class CheckInOutApiController extends ApiController
         $statusForgot = 0;
         $neither = '';
         $statusNeither = 0;
-        if ($previousAttendance){
+        if ($previousAttendance) {
             foreach ($previousAttendance as $value) {
                 $yesterdayCheckIn = $value->check_in ?? null;
                 $yesterdayCheckout = $value->check_out ?? null;
-                if (!!$yesterdayCheckIn && !!$yesterdayCheckout)
-                {
+                if (!!$yesterdayCheckIn && !!$yesterdayCheckout) {
                     $success = $this->getMessage($success, $value);
                     $statusSuccess = 1;
                 }
 
-                if (!!$yesterdayCheckIn && !$yesterdayCheckout)
-                {
+                if (!!$yesterdayCheckIn && !$yesterdayCheckout) {
                     $forgot = $this->getMessage($forgot, $value);
                     $statusForgot = 2;
                 }
 
-                if(!$yesterdayCheckIn && !$yesterdayCheckout){
+                if (!$yesterdayCheckIn && !$yesterdayCheckout) {
                     $neither = $this->getMessage($neither, $value);
                     $statusNeither = 3;
                 }
@@ -705,11 +716,12 @@ class CheckInOutApiController extends ApiController
         }
 
         $responseData['data'] = [
-                'hasCheckInPreviousDay' => ($checkInPreviousDay != null && !in_array(null, $checkInPreviousDay)) ? true:false,
-                'hasCheckedOutPreviousDay' => ($checkOutPreviousDay != null && !in_array(null, $checkOutPreviousDay)) ? true:false,
-                'hasCheckInToday' => $hasCheckInToday,
-                'message' => $this->attendanceMessage($success, $statusSuccess, $forgot, $statusForgot,  $neither, $statusNeither, $message, $request)
-            ]+ $this->getMansionData($attendanceData);
+                'hasCheckInPreviousDay' => ($checkInPreviousDay != null && !in_array(null, $checkInPreviousDay)) ? true : false,
+                'hasCheckedOutPreviousDay' => ($checkOutPreviousDay != null && !in_array(null, $checkOutPreviousDay)) ? true : false,
+//                'hasCheckInToday' => $hasCheckInToday,
+                'hasCheckInToday' => $checkOuts != null ? true : false,
+                'message' => $this->attendanceMessage($success, $statusSuccess, $forgot, $statusForgot, $neither, $statusNeither, $message, $request)
+            ] + $this->getMansionData($attendanceData);
         return response()->json($responseData);
     }
 
