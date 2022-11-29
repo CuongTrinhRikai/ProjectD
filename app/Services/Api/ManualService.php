@@ -26,32 +26,32 @@ class ManualService extends Service
             $limit = $request->query('limit');
 
             if ($mansion_id) {
-
-                $manual = Manual::where('mansion_id', $mansion_id)
-                    ->where('flag', 1)
-                    ->orwhere(function($q) {
-                        $q->orwhereNull('mansion_id')
-                          ->Where('flag', 1);
-                    })
-                    ->where('company_id', $request->company_id)
+                $manual = Manual::where(function ($query) use ($mansion_id) {
+                    $query->where('mansion_id', $mansion_id)
+                        ->where('flag', 1)
+                        ->orwhere(function ($q) {
+                            $q->whereNull('mansion_id')
+                                ->orWhere('flag', 1);
+                        });
+                })->where('company_id', $request->company_id)
                     ->with('mansions')
                     ->orderBy('id', 'DESC')
                     ->paginate($limit ?? 25);
 
                 return $manual;
             }
-            $manual = Manual::whereIn('mansion_id', $buildingAdminMansionID)
 
-            ->where('flag', 1)
-            // ->orwhereNull('mansion_id')
-            ->orwhere(function($q) {
-                $q->orwhereNull('mansion_id')
-                  ->Where('flag', 1);
-            })
-            ->where('company_id', $request->company_id)
-            ->with('mansions')
-            ->orderBy('id', 'DESC')
-            ->paginate($limit ?? 25);
+            $manual = Manual::where(function ($query) use ($buildingAdminMansionID) {
+                $query->whereIn('mansion_id', $buildingAdminMansionID)
+                    ->where('flag', 1)
+                    ->orwhere(function ($q) {
+                        $q->whereNull('mansion_id')
+                            ->orWhere('flag', 1);
+                    });
+            })->where('company_id', $request->company_id)
+                ->with('mansions')
+                ->orderBy('id', 'DESC')
+                ->paginate($limit ?? 25);
 
             return $manual;
         } catch (\Exception $e) {
