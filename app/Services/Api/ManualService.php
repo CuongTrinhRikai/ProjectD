@@ -19,36 +19,32 @@ class ManualService extends Service
 
         try {
             $buildingAdminMansionID = $request->user()->buildingAdminMansion->pluck('id')->toArray();
-
-
             $mansion_id = $request->query('mansion_id');
 
             $limit = $request->query('limit');
-
+            $company_id = $request->company_id;
             if ($mansion_id) {
-                $manual = Manual::where(function ($query) use ($mansion_id) {
-                    $query->where('mansion_id', $mansion_id)
-                        ->where('flag', 1)
-                        ->orwhere(function ($q) {
-                            $q->whereNull('mansion_id')
-                                ->orWhere('flag', 1);
-                        });
-                })->where('company_id', $request->company_id)
+                $manual = Manual::where('mansion_id', $mansion_id)
+                    ->where('flag', 1)
+                    ->orwhere(function ($q) use ($company_id) {
+                        $q->orwhereNull('mansion_id')
+                            ->where('flag', 1)->where('company_id', $company_id);
+                    })
+                    ->where('company_id', $request->company_id)
                     ->with('mansions')
                     ->orderBy('id', 'DESC')
                     ->paginate($limit ?? 25);
 
                 return $manual;
             }
-
-            $manual = Manual::where(function ($query) use ($buildingAdminMansionID) {
-                $query->whereIn('mansion_id', $buildingAdminMansionID)
-                    ->where('flag', 1)
-                    ->orwhere(function ($q) {
-                        $q->whereNull('mansion_id')
-                            ->orWhere('flag', 1);
-                    });
-            })->where('company_id', $request->company_id)
+            $manual = Manual::whereIn('mansion_id', $buildingAdminMansionID)
+                ->where('flag', 1)
+                // ->orwhereNull('mansion_id')
+                ->orwhere(function ($q) use ($company_id) {
+                    $q->orwhereNull('mansion_id')
+                        ->where('flag', 1)->where('company_id', $company_id);
+                })
+                ->where('company_id', $request->company_id)
                 ->with('mansions')
                 ->orderBy('id', 'DESC')
                 ->paginate($limit ?? 25);
