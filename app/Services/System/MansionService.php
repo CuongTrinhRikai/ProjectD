@@ -21,10 +21,7 @@ class MansionService extends Service
     }
     public function getAllData($data, $selectedColumns = [], $pagination = true)
     {
-        $query = $this->query()->join('contractors', function ($join) use ($data) {
-            $join->on('contractors.id', 'mansions.contractor_id')
-                ->where('company_id', $data->company_id);
-        });
+        $query = $this->query()->where('company_id', $data->company_id);
         if (count($selectedColumns) > 0) {
             $query->select($selectedColumns);
         }

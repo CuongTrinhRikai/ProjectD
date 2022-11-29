@@ -33,6 +33,7 @@ class ManualService extends Service
                         $q->orwhereNull('mansion_id')
                           ->Where('flag', 1);
                     })
+                    ->where('company_id', $request->company_id)
                     ->with('mansions')
                     ->orderBy('id', 'DESC')
                     ->paginate($limit ?? 25);
@@ -47,6 +48,7 @@ class ManualService extends Service
                 $q->orwhereNull('mansion_id')
                   ->Where('flag', 1);
             })
+            ->where('company_id', $request->company_id)
             ->with('mansions')
             ->orderBy('id', 'DESC')
             ->paginate($limit ?? 25);
