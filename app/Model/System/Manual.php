@@ -21,7 +21,7 @@ class Manual extends Model
       protected static $logOnlyDirty = true;
 
       protected $fillable = [
-          'name', 'mansion_id','url','flag','manual_type','filename','manual_id'
+          'name', 'mansion_id','url','flag','manual_type','filename','manual_id', 'company_id'
       ];
 
       public function mansions()
