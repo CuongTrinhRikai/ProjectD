@@ -27,10 +27,10 @@ class ManualService extends Service
                 $manual = Manual::where('mansion_id', $mansion_id)
                     ->where('flag', 1)
                     ->orwhere(function ($q) use ($company_id) {
-                        $q->orwhereNull('mansion_id')
+                        $q->whereNull('mansion_id')
                             ->where('flag', 1)->where('company_id', $company_id);
                     })
-                    ->where('company_id', $request->company_id)
+                    ->where('company_id', $company_id)
                     ->with('mansions')
                     ->orderBy('id', 'DESC')
                     ->paginate($limit ?? 25);
@@ -41,10 +41,11 @@ class ManualService extends Service
                 ->where('flag', 1)
                 // ->orwhereNull('mansion_id')
                 ->orwhere(function ($q) use ($company_id) {
-                    $q->orwhereNull('mansion_id')
-                        ->where('flag', 1)->where('company_id', $company_id);
+                    $q->whereNull('mansion_id')
+                        ->where('flag', 1)
+                        ->where('company_id', $company_id);
                 })
-                ->where('company_id', $request->company_id)
+                ->where('company_id', $company_id)
                 ->with('mansions')
                 ->orderBy('id', 'DESC')
                 ->paginate($limit ?? 25);
