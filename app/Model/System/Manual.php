@@ -1,6 +1,6 @@
 <?php
 
-namespace App\MOdel\System;
+namespace App\Model\System;
 
 use App\Model\System\Mansion;
 use App\Traits\uuidTrait;

@@ -2,7 +2,8 @@
 
 namespace Database\Seeders;
 
-use App\MOdel\System\Manual;
+
+use App\Model\System\Manual;
 use Illuminate\Database\Seeder;
 
 class AddCompanyIdToManual extends Seeder
