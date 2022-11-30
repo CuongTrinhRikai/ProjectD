@@ -200,7 +200,7 @@ class CheckInOutApiController extends ApiController
                     event(new Checkin($checkInCheckOut, $emailReceiveMail, $checkInCheckOut->business_category));
                     if ($request->has('businessCategory')) {
                         if ($this->businessCategory($request->businessCategory) && !$changeBusinessCategory){
-                            $this->responseOkWithFlag(frontTrans('Checked In Successfully!!!'));
+                            return $this->responseOkWithFlag(frontTrans('Checked In Successfully!!!'));
                         }
                         return $this->responseOkWithFlagValue(frontTrans('Checked In Successfully!!!'), frontTrans('太陽ビルの管理者に「06-6392-3980」で連絡してください。'));
                     } else {
