@@ -171,6 +171,15 @@
                 .text(item['mansion_name']);
             selectArr.append($option);
         }
+
+        window.onload = () => {
+            let old_contractor = '{{old('contractor_id')}}'
+            let old_mansion = '{{json_encode(old('mansion_id'))}}'
+            if(old_contractor !== '' && old_mansion === 'null'){
+                console.log(12)
+                $('select[name="contractor_id"]').trigger('change')
+            }
+        }
     </script>
 @endsection
 
