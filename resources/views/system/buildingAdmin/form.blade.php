@@ -17,6 +17,9 @@
         @if(!old('mansion_id') && !isset($selectedmansion))
             <input type="hidden" name="list_mansion" value="{{ json_encode($contractors) }}">
         @endif
+        @if(old('mansion_id'))
+            <input type="hidden" name="old_mansion_selected" value="{{ json_encode(old('mansion_id')) }}">
+        @endif
         <div class="col-sm-6">
             <div @if($errors->has('mansion_id')) class="error-msg" @endif>
                 @if($errors->has('mansion_id'))
