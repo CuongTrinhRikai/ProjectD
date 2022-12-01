@@ -101,9 +101,12 @@
         $('select[name="contractor_id"]').ready(function () {
             if ($('input[name="list_mansion"]').val() != null) {
                 //default creation screen
-                $('#selected_mansion').hide();
+                @if(!$errors->has('mansion_id'))
+                    $('#selected_mansion').hide();
+                @endif
             }
-            else if ($('input[name="old_mansion_selected"]').val() != null) {
+            if ($('input[name="old_mansion_selected"]').val() != null) {
+                $('#selected_mansion').show();
                 dataMansionOld();
             } else {
                 dataMansionEdit();
