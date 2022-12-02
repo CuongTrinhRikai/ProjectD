@@ -117,9 +117,12 @@
             let defaultListMansion = JSON.parse($('input[name="old_mansion_selected"]').val());
             let selectArr = $('select[name="mansion_id[]"]')
             selectArr.empty();
-            defaultListMansion.forEach(function (value) {
-                dataMansionSelected(value, selectArr);
-            })
+
+            let array = defaultListMansion.reduce((data,currentValue) => {
+                let result = [...data, {mansion_id: currentValue}];
+                return result;
+            }, []);
+            dataMansionSelected(array, selectArr);
         }
 
         function dataMansionEdit() {
@@ -134,26 +137,28 @@
                 let defaultListMansion = data;
                 let selectArr = $('select[name="mansion_id[]"]')
                 selectArr.empty();
-                defaultListMansion.forEach(function (value) {
-                    dataMansionSelected(value, selectArr, 'mansion_id');
 
-                })
+                dataMansionSelected(defaultListMansion, selectArr, 'mansion_id');
             })
         }
 
-        function dataMansionSelected(value, selectArr, id = null) {
+        function dataMansionSelected(arraySelected, selectArr, id = null) {
             optContractor = {
                 url: '{{ route('get-mansion', '') }}' + '/' + $('select[name="contractor_id"]').val(),
                 method: "GET"
             };
 
+            let array = arraySelected.reduce((data,currentValue) => {
+                let result = [...data, Number(currentValue.mansion_id)];
+                return result;
+            }, []);
             axios(optContractor)
                 .then(function (res) {
                     return res.data
                 }).then(function (data) {
                 let defaultListMansion = data;
                 defaultListMansion.forEach(function (item) {
-                    if (Number(item['id']) === Number(id ? value[id] : value)) {
+                    if (array.includes(Number(item['id']))) {
                         let $option = $("<option selected></option>")
                             .attr("value", item['id'])
                             .text(item['mansion_name']);
