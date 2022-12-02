@@ -412,7 +412,6 @@ function isSameCompany($id, $type): bool
 {
     $current_company_id = \Illuminate\Support\Facades\Auth::user()->company_id;
     try {
-        $company_id = '';
         switch ($type) {
             case 'user':
                 $company_id = \App\User::findOrFail($id)->company_id;
@@ -424,12 +423,32 @@ function isSameCompany($id, $type): bool
                 $company_id = \App\Model\EmailTemplate::findOrFail($id)->company_id;
                 break;
             case 'building':
-                $buidingAdmin = \App\Model\System\BuildingAdmin::findOrFail($id);
-                $company_id = $buidingAdmin->contractor->company_id;
+                $buildingAdmin = \App\Model\System\BuildingAdmin::findOrFail($id);
+                $company_id = $buildingAdmin->contractor->company_id;
                 break;
             case 'contractor':
                 $contractor = \App\Model\System\Contractor::findOrFail($id);
                 $company_id = $contractor->company->id;
+                break;
+            case 'mansion':
+                $mansion = \App\Model\System\Mansion::findOrFail($id);
+                $company_id = $mansion->contractor->company->id;
+                break;
+            case 'guide':
+                $guide = \App\Model\System\Guide::findOrFail($id);
+                $company_id = $guide->user->company->id;
+                break;
+            case 'manual':
+                $manual = \App\Model\System\Manual::findOrFail($id);
+                $company_id = $manual->company_id;
+                break;
+            case 'information-display':
+                $informationDisplay = \App\Model\System\CheckInCheckOut::findOrFail($id);
+                $company_id = $informationDisplay->buildingAdmin->contractor->company_id;
+                break;
+            case 'notification':
+                $notification = \App\Model\System\Notification::findOrFail($id);
+                $company_id = $notification->company_id;
                 break;
             default:
                 return false;
