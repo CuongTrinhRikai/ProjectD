@@ -395,7 +395,9 @@ function getBusinessCategory()
     );
 }
 const RESOURCE_TYPE = [
-    1 => 'user'
+    1 => 'user',
+    2 => 'email',
+    3 => 'config'
 ];
 
 
@@ -406,6 +408,12 @@ function isSameCompany($id, $type): bool
         switch ($type) {
             case 'user':
                 $company_id = \App\User::findOrFail($id)->company_id;
+                return $company_id == $current_company_id;
+            case 'config':
+                $company_id = \App\Model\Config::findOrFail($id)->company_id;
+                return $company_id == $current_company_id;
+            case 'email':
+                $company_id = \App\Model\EmailTemplate::findOrFail($id)->company_id;
                 return $company_id == $current_company_id;
             default:
                 return false;
