@@ -145,7 +145,6 @@
                 dates.setMinutes(59);
 
                 var maxDate = dates;
-                console.log(maxDate);
             }
             if(chooseDate == null || chooseDate == "")
             {
