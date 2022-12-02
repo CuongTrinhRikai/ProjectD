@@ -97,4 +97,17 @@ class ManualController extends ResourceController
 
         }
     }
+
+    public function updateStatus($id)
+    {
+        $model = $this->service->find($id);
+
+        if (isset($model->flag)) {
+
+            $model->flag = !$model->flag;
+            $model->save();
+        }
+
+        return redirect()->back();
+    }
 }
