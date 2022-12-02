@@ -398,7 +398,13 @@ const RESOURCE_TYPE = [
     1 => 'user',
     2 => 'email',
     3 => 'config',
-    4 => 'building'
+    4 => 'building',
+    5 => 'contractor',
+    6 => 'mansion',
+    7 => 'guide',
+    8 => 'manual',
+    9 => 'information-display',
+    10 => 'notification'
 ];
 
 
@@ -406,23 +412,29 @@ function isSameCompany($id, $type): bool
 {
     $current_company_id = \Illuminate\Support\Facades\Auth::user()->company_id;
     try {
+        $company_id = '';
         switch ($type) {
             case 'user':
                 $company_id = \App\User::findOrFail($id)->company_id;
-                return $company_id == $current_company_id;
+                break;
             case 'config':
                 $company_id = \App\Model\Config::findOrFail($id)->company_id;
-                return $company_id == $current_company_id;
+                break;
             case 'email':
                 $company_id = \App\Model\EmailTemplate::findOrFail($id)->company_id;
-                return $company_id == $current_company_id;
+                break;
             case 'building':
                 $buidingAdmin = \App\Model\System\BuildingAdmin::findOrFail($id);
                 $company_id = $buidingAdmin->contractor->company_id;
-                return $company_id == $current_company_id;
+                break;
+            case 'contractor':
+                $contractor = \App\Model\System\Contractor::findOrFail($id);
+                $company_id = $contractor->company->id;
+                break;
             default:
                 return false;
         }
+        return $company_id == $current_company_id;
     } catch (Exception $e) {
         return false;
     }
