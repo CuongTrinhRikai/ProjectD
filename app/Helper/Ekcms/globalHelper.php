@@ -110,14 +110,17 @@ function setConfigCookie($company_id = null)
     $defaultTitle = 'TAIYOU';
     $defaultLogo = 'cms_logo.png';
     $defaultColor = '#292961';
-    if(is_null($company_id)){
+    if (is_null($company_id)) {
         Cookie::queue('title', $defaultTitle, 10000);
         Cookie::queue('logo', $defaultLogo, 10000);
         Cookie::queue('color', $defaultColor, 10000);
-    }else{
-        Cookie::queue('title', conf::where('label', 'cms title')->where('company_id', $company_id)->first()->value, 10000);
-        Cookie::queue('logo', conf::where('label', 'cms logo')->where('company_id', $company_id)->first()->value, 10000);
-        Cookie::queue('color', conf::where('label', 'cms theme color')->where('company_id', $company_id)->first()->value, 10000);
+    } else {
+        Cookie::queue('title', conf::where('label', 'cms title')->where('company_id', $company_id)->first()->value,
+            10000);
+        Cookie::queue('logo', conf::where('label', 'cms logo')->where('company_id', $company_id)->first()->value,
+            10000);
+        Cookie::queue('color',
+            conf::where('label', 'cms theme color')->where('company_id', $company_id)->first()->value, 10000);
     }
 }
 
@@ -168,14 +171,18 @@ function SN($sn, $key)
 function randomPassword($length = 6, $add_dashes = false, $available_sets = 'luds')
 {
     $sets = array();
-    if (strpos($available_sets, 'l') !== false)
+    if (strpos($available_sets, 'l') !== false) {
         $sets[] = 'abcdefghjkmnpqrstuvwxyz';
-    if (strpos($available_sets, 'u') !== false)
+    }
+    if (strpos($available_sets, 'u') !== false) {
         $sets[] = 'ABCDEFGHJKMNPQRSTUVWXYZ';
-    if (strpos($available_sets, 'd') !== false)
+    }
+    if (strpos($available_sets, 'd') !== false) {
         $sets[] = '23456789';
-    if (strpos($available_sets, 's') !== false)
+    }
+    if (strpos($available_sets, 's') !== false) {
         $sets[] = '!@#$%&*?';
+    }
     $all = '';
     $password = '';
     foreach ($sets as $set) {
@@ -183,11 +190,13 @@ function randomPassword($length = 6, $add_dashes = false, $available_sets = 'lud
         $all .= $set;
     }
     $all = str_split($all);
-    for ($i = 0; $i < $length - count($sets); $i++)
+    for ($i = 0; $i < $length - count($sets); $i++) {
         $password .= $all[array_rand($all)];
+    }
     $password = str_shuffle($password);
-    if (!$add_dashes)
+    if (!$add_dashes) {
         return $password;
+    }
     $dash_len = floor(sqrt($length));
     $dash_str = '';
     while (strlen($password) > $dash_len) {
@@ -198,17 +207,17 @@ function randomPassword($length = 6, $add_dashes = false, $available_sets = 'lud
     return $dash_str;
 }
 
-function preSignedUrl($fileName,$type)
+function preSignedUrl($fileName, $type)
 {
-    $typename ='pdf/';
+    $typename = 'pdf/';
     $typeextension = '.pdf';
 
-    if($type == 0){
-        $typename ='video/';
+    if ($type == 0) {
+        $typename = 'video/';
         $typeextension = '.mp4';
     }
     $s3 = Storage::disk('s3');
-    $generatedFileName = $typename.Str::random(50).$typeextension;
+    $generatedFileName = $typename . Str::random(50) . $typeextension;
     $client = $s3->getDriver()->getAdapter()->getClient();
     $expiry = "+1440 minutes";
     $command = $client->getCommand('PutObject', [
@@ -222,6 +231,7 @@ function preSignedUrl($fileName,$type)
 
     return $data;
 }
+
 function paginateCollection($items, $perPage)
 {
     if (is_array($items)) {
@@ -239,22 +249,54 @@ function paginateCollection($items, $perPage)
 
 function Business($business)
 {
-    if ($business == '0') return '001';
-    if ($business == '1') return '008';
-    if ($business == '2') return '004';
-    if ($business == '3') return '002';
-    if ($business == '4') return '003';
-    if ($business == '5') return '023';
-    if ($business == '6') return '029';
-    if ($business == '7') return '037';
-    if ($business == '8') return '009';
-    if ($business == '9') return '020';
-    if ($business == '10') return '013';
-    if ($business == '11') return '040';
-    if ($business == '12') return '035';
-    if ($business == '13') return '007';
-    if ($business == '14') return '026';
-    if ($business == '15') return '005';
+    if ($business == '0') {
+        return '001';
+    }
+    if ($business == '1') {
+        return '008';
+    }
+    if ($business == '2') {
+        return '004';
+    }
+    if ($business == '3') {
+        return '002';
+    }
+    if ($business == '4') {
+        return '003';
+    }
+    if ($business == '5') {
+        return '023';
+    }
+    if ($business == '6') {
+        return '029';
+    }
+    if ($business == '7') {
+        return '037';
+    }
+    if ($business == '8') {
+        return '009';
+    }
+    if ($business == '9') {
+        return '020';
+    }
+    if ($business == '10') {
+        return '013';
+    }
+    if ($business == '11') {
+        return '040';
+    }
+    if ($business == '12') {
+        return '035';
+    }
+    if ($business == '13') {
+        return '007';
+    }
+    if ($business == '14') {
+        return '026';
+    }
+    if ($business == '15') {
+        return '005';
+    }
 }
 
 function getNameFromCode()
@@ -281,22 +323,54 @@ function getNameFromCode()
 
 function businessCategory($businessCategory)
 {
-    if ($businessCategory == '001') return '001';
-    if ($businessCategory == '008') return '008';
-    if ($businessCategory == '004') return '004';
-    if ($businessCategory == '002') return '002';
-    if ($businessCategory == '003') return '003';
-    if ($businessCategory == '023') return '023';
-    if ($businessCategory == '029') return '029';
-    if ($businessCategory == '037') return '037';
-    if ($businessCategory == '009') return '009';
-    if ($businessCategory == '020') return '020';
-    if ($businessCategory == '013') return '013';
-    if ($businessCategory == '040') return '040';
-    if ($businessCategory == '035') return '035';
-    if ($businessCategory == '007') return '007';
-    if ($businessCategory == '026') return '026';
-    if ($businessCategory == '005') return '005';
+    if ($businessCategory == '001') {
+        return '001';
+    }
+    if ($businessCategory == '008') {
+        return '008';
+    }
+    if ($businessCategory == '004') {
+        return '004';
+    }
+    if ($businessCategory == '002') {
+        return '002';
+    }
+    if ($businessCategory == '003') {
+        return '003';
+    }
+    if ($businessCategory == '023') {
+        return '023';
+    }
+    if ($businessCategory == '029') {
+        return '029';
+    }
+    if ($businessCategory == '037') {
+        return '037';
+    }
+    if ($businessCategory == '009') {
+        return '009';
+    }
+    if ($businessCategory == '020') {
+        return '020';
+    }
+    if ($businessCategory == '013') {
+        return '013';
+    }
+    if ($businessCategory == '040') {
+        return '040';
+    }
+    if ($businessCategory == '035') {
+        return '035';
+    }
+    if ($businessCategory == '007') {
+        return '007';
+    }
+    if ($businessCategory == '026') {
+        return '026';
+    }
+    if ($businessCategory == '005') {
+        return '005';
+    }
 }
 
 function getBusinessCategory()
@@ -319,4 +393,69 @@ function getBusinessCategory()
         '14' => '夜間管理員',
         '15' => '住み込み管理委託',
     );
+}
+const RESOURCE_TYPE = [
+    1 => 'user',
+    2 => 'email',
+    3 => 'config',
+    4 => 'building',
+    5 => 'contractor',
+    6 => 'mansion',
+    7 => 'guide',
+    8 => 'manual',
+    9 => 'information-display',
+    10 => 'notification'
+];
+
+const NO_ACCESS_MSG = 'An error occurred, please try again later!';
+
+function isSameCompany($id, $type): bool
+{
+    $current_company_id = \Illuminate\Support\Facades\Auth::user()->company_id;
+    try {
+        switch ($type) {
+            case 'user':
+                $company_id = \App\User::findOrFail($id)->company_id;
+                break;
+            case 'config':
+                $company_id = \App\Model\Config::findOrFail($id)->company_id;
+                break;
+            case 'email':
+                $company_id = \App\Model\EmailTemplate::findOrFail($id)->company_id;
+                break;
+            case 'building':
+                $buildingAdmin = \App\Model\System\BuildingAdmin::findOrFail($id);
+                $company_id = $buildingAdmin->contractor->company_id;
+                break;
+            case 'contractor':
+                $contractor = \App\Model\System\Contractor::findOrFail($id);
+                $company_id = $contractor->company->id;
+                break;
+            case 'mansion':
+                $mansion = \App\Model\System\Mansion::findOrFail($id);
+                $company_id = $mansion->contractor->company->id;
+                break;
+            case 'guide':
+                $guide = \App\Model\System\Guide::findOrFail($id);
+                $company_id = $guide->user->company->id;
+                break;
+            case 'manual':
+                $manual = \App\Model\System\Manual::findOrFail($id);
+                $company_id = $manual->company_id;
+                break;
+            case 'information-display':
+                $informationDisplay = \App\Model\System\CheckInCheckOut::findOrFail($id);
+                $company_id = $informationDisplay->buildingAdmin->contractor->company_id;
+                break;
+            case 'notification':
+                $notification = \App\Model\System\Notification::findOrFail($id);
+                $company_id = $notification->company_id;
+                break;
+            default:
+                return false;
+        }
+        return $company_id == $current_company_id;
+    } catch (Exception $e) {
+        return false;
+    }
 }

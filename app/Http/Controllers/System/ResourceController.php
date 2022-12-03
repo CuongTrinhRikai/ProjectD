@@ -281,16 +281,4 @@ class ResourceController extends Controller
     $this->setModuleId($id);
     return redirect($this->getUrl())->withErrors(['success' =>translate('Successfully deleted.')]);
   }
-  public function updateStatus($id)
-    {
-        $model = $this->service->find($id);
-
-        if (isset($model->flag)) {
-
-            $model->flag = !$model->flag;
-            $model->save();
-        }
-
-        return redirect()->back();
-    }
 }
