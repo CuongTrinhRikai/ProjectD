@@ -407,6 +407,7 @@ const RESOURCE_TYPE = [
     10 => 'notification'
 ];
 
+const NO_ACCESS_MSG = 'An error occurred, please try again later!';
 
 function isSameCompany($id, $type): bool
 {
