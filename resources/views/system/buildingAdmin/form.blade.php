@@ -10,22 +10,16 @@
             <x-system.form.input-select :input="[ 'name' => 'contractor_id', 'label'=> 'Contractor','default' => old('contractor_id') ?? $item->contractor_id ?? old('contractor_id') , 'options' => $contractors, 'placeholder' => 'Select a Contractor', 'error' => $errors->first('contractor_id')]" />
         </x-slot>
     </x-system.form.form-group-space>
-    <div class="form-group row" id="selected_mansion">
+    <div class="form-group row" id="">
         <label for="mansion_id" class="col-sm-3 col-form-label ">
-           {{translate('Mansion')}} <span style="color: red">*</span>
+            {{translate('Mansion')}} <span style="color: red">*</span>
         </label>
-        @if(!old('mansion_id') && !isset($selectedmansion))
-            <input type="hidden" name="list_mansion" value="{{ json_encode($contractors) }}">
-        @endif
-        @if(old('mansion_id'))
-            <input type="hidden" name="old_mansion_selected" value="{{ json_encode(old('mansion_id')) }}">
-        @endif
         <div class="col-sm-6">
             <div @if($errors->has('mansion_id')) class="error-msg" @endif>
                 @if($errors->has('mansion_id'))
                     <img src="{{asset('images/image.svg')}}">
                 @endif
-                {{ Form::select('mansion_id[]',$mansions, null,['class'=>'form-control multiple','multiple' => 'multiple']) }}
+                {{ Form::select('mansion_id[]',$mansions,isset($selectedmansion)? $selectedmansion: null,['class'=>'form-control multiple', 'multiple' => 'multiple']) }}
                 @error('mansion_id')
                 <p class="invalid-text text-danger" style="text-align: left;font-size: 80%">{{translate($message)}}</p>
                 @enderror
@@ -73,117 +67,6 @@
             $('.multiple').select2({placeholder: `{{translate('select mansion')}}`});
             $('.multiple-business').select2({placeholder: `{{translate('select business category')}}`});
         });
-
-        $('select[name="contractor_id"]').change(function () {
-           if ($('select[name="contractor_id"]').val() >= 1){
-               $('#selected_mansion').show();
-               opt = {
-                   url: '{{ route('get-mansion', '') }}' + '/' + $('select[name="contractor_id"]').val(),
-                   method: "GET"
-               };
-               axios(opt)
-                   .then(function (res) {
-                       return res.data
-                   }).then(function (data) {
-                   let defaultListMansion = data;
-                   let selectArr = $('select[name="mansion_id[]"]')
-                   selectArr.empty();
-                   defaultListMansion.forEach(function (value) {
-                       addOption(value, selectArr);
-
-                   })
-               })
-           } else {
-               $('#selected_mansion').hide();
-           }
-        })
-
-        $('select[name="contractor_id"]').ready(function () {
-            if ($('input[name="list_mansion"]').val() != null) {
-                //default creation screen
-                @if(!$errors->has('mansion_id'))
-                    $('#selected_mansion').hide();
-                @endif
-            }
-            if ($('input[name="old_mansion_selected"]').val() != null) {
-                $('#selected_mansion').show();
-                dataMansionOld();
-            } else {
-                dataMansionEdit();
-            }
-        })
-
-        function dataMansionOld() {
-            let defaultListMansion = JSON.parse($('input[name="old_mansion_selected"]').val());
-            let selectArr = $('select[name="mansion_id[]"]')
-            selectArr.empty();
-
-            let array = defaultListMansion.reduce((data,currentValue) => {
-                let result = [...data, {mansion_id: currentValue}];
-                return result;
-            }, []);
-            dataMansionSelected(array, selectArr);
-        }
-
-        function dataMansionEdit() {
-            optEdit = {
-                url: '{{ route('get-mansion-edit', '') }}' + '/' + $('input[name="id"]').val(),
-                method: "GET"
-            };
-            axios(optEdit)
-                .then(function (res) {
-                    return res.data
-                }).then(function (data) {
-                let defaultListMansion = data;
-                let selectArr = $('select[name="mansion_id[]"]')
-                selectArr.empty();
-
-                dataMansionSelected(defaultListMansion, selectArr, 'mansion_id');
-            })
-        }
-
-        function dataMansionSelected(arraySelected, selectArr, id = null) {
-            optContractor = {
-                url: '{{ route('get-mansion', '') }}' + '/' + $('select[name="contractor_id"]').val(),
-                method: "GET"
-            };
-
-            let array = arraySelected.reduce((data,currentValue) => {
-                let result = [...data, Number(currentValue.mansion_id)];
-                return result;
-            }, []);
-            axios(optContractor)
-                .then(function (res) {
-                    return res.data
-                }).then(function (data) {
-                let defaultListMansion = data;
-                defaultListMansion.forEach(function (item) {
-                    if (array.includes(Number(item['id']))) {
-                        let $option = $("<option selected></option>")
-                            .attr("value", item['id'])
-                            .text(item['mansion_name']);
-                        selectArr.append($option);
-                    } else {
-                        addOption(item, selectArr);
-                    }
-                })
-            })
-        }
-
-        function addOption(item, selectArr) {
-            let $option = $("<option></option>")
-                .attr("value", item['id'])
-                .text(item['mansion_name']);
-            selectArr.append($option);
-        }
-
-        window.onload = () => {
-            let old_contractor = '{{old('contractor_id')}}'
-            let old_mansion = '{{json_encode(old('mansion_id'))}}'
-            if(old_contractor !== '' && old_mansion === 'null'){
-                $('select[name="contractor_id"]').trigger('change')
-            }
-        }
     </script>
 @endsection
 
