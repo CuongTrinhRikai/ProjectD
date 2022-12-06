@@ -6,6 +6,7 @@ use App\Model\System\BuildingAdmin;
 use App\Model\System\Contractor;
 use App\Model\System\Mansion;
 use App\Services\Service;
+use http\Env\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
@@ -19,14 +20,13 @@ class BuildingAdminService extends Service
         $this->contractor = $contractor;
     }
 
-
-    public function getMansions($request)
+    public function getMansions()
     {
         $mapped = array();
 
-        $mansions = $this->mansion->whereHas('contractor', function ($query) use ($request) {
-            $query->where('company_id', $request->company_id);
-        })->orderBy('mansion_name', 'ASC')->get();
+        $mansions = $this->mansion->orderBy('mansion_name', 'ASC')->whereHas('contractor', function ($query) {
+            $query->where('company_id', \request()->company_id);
+        })->get();
         foreach ($mansions as $mansion) {
             $mapped[$mansion->id] = $mansion->mansion_name;
         }
@@ -52,7 +52,7 @@ class BuildingAdminService extends Service
     {
         return [
             'items' => $this->getAllData($request),
-            'mansions' => $this->getMansions($request),
+            'mansions' => $this->getMansions(),
             'contractors' => $this->getContractor($request),
             'business' => getBusinessCategory()
         ];
@@ -90,7 +90,7 @@ class BuildingAdminService extends Service
     public function createPageData($request)
     {
         return [
-            'mansions' => $this->getMansions($request),
+            'mansions' => $this->getMansions(),
             'contractors' => $this->getContractor($request),
             'business' => getBusinessCategory()
         ];
@@ -125,7 +125,7 @@ class BuildingAdminService extends Service
 
         return [
             'item' => $buildingAdmin,
-            'mansions' => $this->getMansions($request),
+            'mansions' => $this->getMansions(),
             'contractors' => $this->getContractor($request),
             'business' => getBusinessCategory(),
             'selectedmansion' => $selectedmansion,
