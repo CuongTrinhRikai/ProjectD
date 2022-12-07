@@ -20,11 +20,7 @@ class ManualService extends Service
 
     public function getAllData($data, $selectedColumns = [], $pagination = true)
     {
-        $query = $this->query()->whereHas('mansions', function ($query) use ($data) {
-            $query->whereHas('contractor', function ($query) use ($data) {
-                $query->where('company_id', $data->company_id);
-            });
-        });
+        $query = $this->query()->where('company_id', $data->company_id);
         if (count($selectedColumns) > 0) {
             $query->select($selectedColumns);
         }

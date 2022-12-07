@@ -1,6 +1,6 @@
 <?php
 
-namespace App\MOdel\System;
+namespace App\Model\System;
 
 use App\Model\System\Mansion;
 use App\Traits\uuidTrait;
@@ -21,7 +21,7 @@ class Manual extends Model
       protected static $logOnlyDirty = true;
 
       protected $fillable = [
-          'name', 'mansion_id','url','flag','manual_type','filename','manual_id'
+          'name', 'mansion_id','url','flag','manual_type','filename','manual_id', 'company_id'
       ];
 
       public function mansions()

@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\DB;
 use App\Model\System\BuildingAdmin;
 use App\Exceptions\CustomGenericException;
 use Exception;
+use Illuminate\Support\Facades\Log;
 use PhpParser\Node\Expr\AssignOp\Concat;
 use PhpParser\Node\Stmt\Catch_;
 
@@ -161,15 +162,16 @@ class NotificationService extends Service
                         throw new CustomGenericException(translate('Unsuccessful to send notification'));
                     }
                 } else {
-
+                    $admin = Notification::getBuildingAdminFromCompany($request->company_id)->toArray();
                     $data = $request->except('_token', 'contractor_id', 'building_admin_id');
                     $request->contractor_id = null;
                     $request->building_admin_id = null;
-                    $notification = $this->sanitizecreateModel($request, $data,$admin);
+                    $notification = $this->sanitizecreateModel($request, $data, null);
 
-                    $client = new Client(['base_uri' => Config::get('constants.FCM_ALL_USERS')]);
+                    $client = new Client(['base_uri' => Config::get('constants.FCM_TO_USERS')]);
                     $res = $client->request('POST', '', [
                         'json' => [
+                            'ids' => $admin,
                             'title' => $data['title'],
                             'body' => $data['body'],
                             'type' => env('TYPE'),
