@@ -417,9 +417,13 @@ class CheckInOutApiController extends ApiController
         if ($checklatest->check_out != null) {
             return $this->responseOk(frontTrans('Already Checkout from this Mansion.'));
         }
-
-        if ($latestCheckinTime < $checkoutTime && $checkoutTime < $validLatestCheckoutTime) {
-
+        $idMax = CheckInCheckOut::where('mansion_id', $request->mansion_id)
+            ->where('building_admin_id', $request->user()->id);
+        if (isset($request->version_app) && version_compare($request->version_app, \Config::get('constants.VERSION_APP'), '>=')) {
+            $idMax->where('business_category', $request->businessCategory);
+        }
+        $dataCheckIn = $idMax->select('id', 'check_out')->latest()->first();
+        if ($latestCheckinTime < $checkoutTime && $checkoutTime < $validLatestCheckoutTime && is_null($dataCheckIn->check_out)) {
             $lastCheckin->check_out = Carbon::now()->format('Y-m-d H:i:s');
             $object = json_decode(json_encode($lastCheckin), true);
             $this->service->update($object, $lastCheckin->id);
@@ -657,7 +661,22 @@ class CheckInOutApiController extends ApiController
             ->whereRaw("DATE_FORMAT(DATE(convert_tz(check_in,'+00:00','+09:00')),'%Y-%m-%d') >='" . $diffNow . "'")
             ->whereRaw("DATE_FORMAT(DATE(convert_tz(check_in,'+00:00','+09:00')),'%Y-%m-%d') <='" . $dateNow . "'")
             ->whereNull('check_out')
-            ->get()->toArray();
+            ->orderBy('id', 'DESC')
+            ->select('id','mansion_id','business_category','building_admin_id')
+            ->get();
+
+        $checkInToday = [];
+        foreach ($checkOuts as $checkOut) {
+            $idMax = CheckInCheckOut::where('mansion_id', $checkOut->mansion_id)
+                ->where('building_admin_id', $request->user()->id);
+            if (isset($request->version_app) && version_compare($request->version_app, \Config::get('constants.VERSION_APP'), '>=')) {
+                $idMax->where('business_category', $checkOut->business_category);
+            }
+            $dataIdMax = $idMax->select('id','mansion_id','business_category','building_admin_id')->latest()->first();
+            if ($checkOut->id == $dataIdMax->id) {
+                $checkInToday[] = $checkOut;
+            }
+        }
 
 //        $hasCheckInToday = false;
 //        $attendanceData = null;
@@ -719,9 +738,9 @@ class CheckInOutApiController extends ApiController
                 'hasCheckInPreviousDay' => ($checkInPreviousDay != null && !in_array(null, $checkInPreviousDay)) ? true : false,
                 'hasCheckedOutPreviousDay' => ($checkOutPreviousDay != null && !in_array(null, $checkOutPreviousDay)) ? true : false,
 //                'hasCheckInToday' => $hasCheckInToday,
-                'hasCheckInToday' => $checkOuts != null ? true : false,
+                'hasCheckInToday' => $checkInToday != null ? true : false,
                 'message' => $this->attendanceMessage($success, $statusSuccess, $forgot, $statusForgot, $neither, $statusNeither, $message, $request)
-            ] + $this->getMansionData($attendanceData);
+            ] + $this->getMansionData($checkInToday);
         return response()->json($responseData);
     }
 
@@ -746,9 +765,10 @@ class CheckInOutApiController extends ApiController
                 'mansionName' => null
             ];
         }
+        $mansionId = $attendance[0]['mansion_id'];
         return [
-            'mansionId' => $attendance->mansion_id,
-            'mansionName' => $attendance->mansion->mansion_name
+            'mansionId' => $mansionId,
+            'mansionName' => Mansion::find($mansionId)->mansion_name
         ];
     }
 
