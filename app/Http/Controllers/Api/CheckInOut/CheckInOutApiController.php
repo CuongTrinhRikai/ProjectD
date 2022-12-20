@@ -385,7 +385,7 @@ class CheckInOutApiController extends ApiController
             return $this->errorForbidden(frontTrans('先にチェックインしてください。'));
         }
         $latestCheckinTime = Carbon::parse($lastCheckin->check_in, 'Asia/Tokyo')->addHour(9);
-        $validLatestCheckoutTime = Carbon::parse($lastCheckin->check_in, 'Asia/Tokyo')->addHour(9)->endOfDay()->addDay(7);
+        $validLatestCheckoutTime = Carbon::parse($lastCheckin->check_in, 'Asia/Tokyo')->addHour(9)->startOfDay()->addDay(1)->addHour(3)->addMinute(59)->addSecond(59);
 
         $startTime = Carbon::parse($lastCheckin->check_in, 'Asia/Tokyo')->startOfDay();
 
@@ -417,13 +417,7 @@ class CheckInOutApiController extends ApiController
         if ($checklatest->check_out != null) {
             return $this->responseOk(frontTrans('Already Checkout from this Mansion.'));
         }
-        $idMax = CheckInCheckOut::where('mansion_id', $request->mansion_id)
-            ->where('building_admin_id', $request->user()->id);
-        if (isset($request->version_app) && version_compare($request->version_app, \Config::get('constants.VERSION_APP'), '>=')) {
-            $idMax->where('business_category', $request->businessCategory);
-        }
-        $dataCheckIn = $idMax->select('id', 'check_out')->latest()->first();
-        if ($latestCheckinTime < $checkoutTime && $checkoutTime < $validLatestCheckoutTime && is_null($dataCheckIn->check_out)) {
+        if ($latestCheckinTime < $checkoutTime && $checkoutTime < $validLatestCheckoutTime) {
             $lastCheckin->check_out = Carbon::now()->format('Y-m-d H:i:s');
             $object = json_decode(json_encode($lastCheckin), true);
             $this->service->update($object, $lastCheckin->id);
@@ -653,29 +647,27 @@ class CheckInOutApiController extends ApiController
 
     public function attendanceResponse($attendance, $previousAttendance, $request)
     {
-        $dateNow = Carbon::parse($request->input_date, 'Asia/Tokyo')->format('Y-m-d');
-        $diffNow = Carbon::parse($request->input_date, 'Asia/Tokyo')->subDays(7)->format('Y-m-d');
-
-        $checkOuts = CheckInCheckOut::
-        where('building_admin_id', $request->user()->id)
-            ->whereRaw("DATE_FORMAT(DATE(convert_tz(check_in,'+00:00','+09:00')),'%Y-%m-%d') >='" . $diffNow . "'")
-            ->whereRaw("DATE_FORMAT(DATE(convert_tz(check_in,'+00:00','+09:00')),'%Y-%m-%d') <='" . $dateNow . "'")
-            ->whereNull('check_out')
-            ->orderBy('id', 'DESC')
-            ->select('id','mansion_id','business_category','building_admin_id')
-            ->get();
-
-        $checkInToday = [];
-        foreach ($checkOuts as $checkOut) {
-            $idMax = CheckInCheckOut::where('mansion_id', $checkOut->mansion_id)
-                ->where('building_admin_id', $request->user()->id);
-            if (isset($request->version_app) && version_compare($request->version_app, \Config::get('constants.VERSION_APP'), '>=')) {
-                $idMax->where('business_category', $checkOut->business_category);
+        $hasCheckInToday = false;
+        $attendanceData = null;
+        if ($attendance){
+            $timeDate = null;
+            foreach ($attendance as $value){
+                if (isset($value) && !is_null($value->check_in) && !is_null($value->check_out)){
+                    $hasCheckInToday = false;
+                    $timeDate = Carbon::parse($value->check_in, 'Asia/Tokyo')->format(self::formatYMD);
+                } else{
+                    $timeDate = Carbon::parse($value->check_in, 'Asia/Tokyo')->format(self::formatYMD);
+                    $hasCheckInToday = true;
+                    break;
+                }
             }
-            $dataIdMax = $idMax->select('id','mansion_id','business_category','building_admin_id')->latest()->first();
-            if ($checkOut->id == $dataIdMax->id) {
-                $checkInToday[] = $checkOut;
-            }
+            $attendanceData = CheckInCheckOut::
+            whereRaw("DATE_FORMAT(DATE(check_in),'%Y-%m-%d')='".$timeDate."'")
+                ->where('building_admin_id', $request->user()->id)
+                ->distinct('mansion_id')
+                ->whereNull('check_out')
+                ->orderBy('check_in', 'DESC')
+                ->first();
         }
 
 //        $hasCheckInToday = false;
@@ -693,15 +685,6 @@ class CheckInOutApiController extends ApiController
 //                }
 //            }
 //        }
-
-        $attendanceData = CheckInCheckOut::
-        where('building_admin_id', $request->user()->id)
-            ->whereRaw("DATE_FORMAT(DATE(convert_tz(check_in,'+00:00','+09:00')),'%Y-%m-%d') >='" . $diffNow . "'")
-            ->whereRaw("DATE_FORMAT(DATE(convert_tz(check_in,'+00:00','+09:00')),'%Y-%m-%d') <='" . $dateNow . "'")
-            ->distinct('mansion_id')
-            ->whereNull('check_out')
-            ->orderBy('check_in', 'DESC')
-            ->first();
         $checkInPreviousDay = [];
         $checkOutPreviousDay = [];
         $message = [];
@@ -737,10 +720,9 @@ class CheckInOutApiController extends ApiController
         $responseData['data'] = [
                 'hasCheckInPreviousDay' => ($checkInPreviousDay != null && !in_array(null, $checkInPreviousDay)) ? true : false,
                 'hasCheckedOutPreviousDay' => ($checkOutPreviousDay != null && !in_array(null, $checkOutPreviousDay)) ? true : false,
-//                'hasCheckInToday' => $hasCheckInToday,
-                'hasCheckInToday' => $checkInToday != null ? true : false,
+                'hasCheckInToday' => $hasCheckInToday,
                 'message' => $this->attendanceMessage($success, $statusSuccess, $forgot, $statusForgot, $neither, $statusNeither, $message, $request)
-            ] + $this->getMansionData($checkInToday);
+            ] + $this->getMansionData($attendanceData);
         return response()->json($responseData);
     }
 
@@ -765,10 +747,9 @@ class CheckInOutApiController extends ApiController
                 'mansionName' => null
             ];
         }
-        $mansionId = $attendance[0]['mansion_id'];
         return [
-            'mansionId' => $mansionId,
-            'mansionName' => Mansion::find($mansionId)->mansion_name
+            'mansionId' => $attendance->mansion_id,
+            'mansionName' => $attendance->mansion->mansion_name
         ];
     }
 
