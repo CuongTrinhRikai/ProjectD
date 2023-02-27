@@ -297,6 +297,9 @@ function Business($business)
     if ($business == '15') {
         return '005';
     }
+    if ($business == '16') {
+        return '024';
+    }
 }
 
 function getNameFromCode()
@@ -318,6 +321,7 @@ function getNameFromCode()
         '007' => '巡回管理業務',
         '026' => '夜間管理員',
         '005' => '住み込み管理委託',
+        '024' => '日常清掃業務',
     );
 }
 
@@ -371,6 +375,9 @@ function businessCategory($businessCategory)
     if ($businessCategory == '005') {
         return '005';
     }
+    if ($businessCategory == '024') {
+        return '024';
+    }
 }
 
 function getBusinessCategory()
@@ -392,6 +399,7 @@ function getBusinessCategory()
         '13' => '巡回管理業務',
         '14' => '夜間管理員',
         '15' => '住み込み管理委託',
+        '16' => '日常清掃業務',
     );
 }
 const RESOURCE_TYPE = [

@@ -30,6 +30,7 @@ class BuildingAdminTransformer extends TransformerAbstract
             '13'  => '巡回管理業務',
             '14'  => '夜間管理員',
             '15'  => '住み込み管理委託',
+            '16'  => '日常清掃業務',
         ];
 
 

@@ -43,7 +43,8 @@ class mansionRequest extends FormRequest
                $validate = array_merge($validate, [
                    'mansion_id' => 'required|max:255|min:1',
                    'mansion_name' => 'required|string|max:255|min:3|regex:/(?!^\d+$)^.+$/|unique:mansions,mansion_name',
-                   'mansion_phone' => 'regex:/^(\+\d{1,3}[- ]?)?\d{10}$/|numeric|unique:mansions,mansion_phone',
+                   //'mansion_phone' => 'regex:/^(\+\d{1,3}[- ]?)?\d{10}$/|numeric|unique:mansions,mansion_phone',
+                   'mansion_phone' => 'regex:/^(\+\d{1,3}[- ]?)?\d{10}$/|numeric'
                ]);
            }
         }
@@ -58,8 +59,8 @@ class mansionRequest extends FormRequest
                 $validate = array_merge($validate, [
                     'mansion_id' => 'required|max:255|min:1',
                     'mansion_name' => 'required|string|max:255|min:3|regex:/(?!^\d+$)^.+$/|unique:mansions,mansion_name,'.$request->mansion,
-                    'mansion_phone' => 'regex:/^(\+\d{1,3}[- ]?)?\d{10}$/|numeric|unique:mansions,mansion_phone,'.$request->mansion,
-
+                    //'mansion_phone' => 'regex:/^(\+\d{1,3}[- ]?)?\d{10}$/|numeric|unique:mansions,mansion_phone,'.$request->mansion,
+                    'mansion_phone' => 'regex:/^(\+\d{1,3}[- ]?)?\d{10}$/|numeric'
                 ]);
             }
         }
