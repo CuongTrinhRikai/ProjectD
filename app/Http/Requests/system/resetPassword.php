@@ -24,7 +24,8 @@ class resetPassword extends FormRequest
     public function rules()
     {
         return [
-            'password' => ['required','confirmed','regex:/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*(_|[^\w])).{8,20}+$/'],
+            //'password' => ['required','confirmed','regex:/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*(_|[^\w])).{8,20}+$/'],
+            'password' => ['required','confirmed','regex:/^[0-9]{4,128}+$/'],
             'password_confirmation' => 'required'
         ];
     }
