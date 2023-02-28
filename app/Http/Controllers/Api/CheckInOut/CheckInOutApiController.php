@@ -756,15 +756,15 @@ class CheckInOutApiController extends ApiController
     public function attendanceMessage($success, $statusSuccess, $forgot, $statusForgot,  $neither, $statusNeither, $message, $request)
     {
         if (!!$success && $statusSuccess == 1) {
-            $message[] = $success . ' ' . "物件管理者が前日にチェックアウトしました。";
+            //$message[] = $success . ' ' . "物件管理者が前日にチェックアウトしました。";
         }
 
         if (!!$forgot && $statusForgot == 2) {
-            $message[] = $forgot . ' ' . "昨日のチェックアウトを忘れました。";
+            //$message[] = $forgot . ' ' . "昨日のチェックアウトを忘れました。";
         }
 
         if (!!$neither && $statusNeither == 3) {
-            $message[] = $neither . ' ' . "昨日はチェックインもチェックアウトもしていません。";
+            //$message[] = $neither . ' ' . "昨日はチェックインもチェックアウトもしていません。";
         }
         if (isset($request->version_app) && version_compare($request->version_app, \Config::get('constants.VERSION_APP'), '>=')) {
             //return $message;
