@@ -767,7 +767,7 @@ class CheckInOutApiController extends ApiController
             $message[] = $neither . ' ' . "昨日はチェックインもチェックアウトもしていません。";
         }
         if (isset($request->version_app) && version_compare($request->version_app, \Config::get('constants.VERSION_APP'), '>=')) {
-            return $message;
+            //return $message;
         }
         if ($message) {
             return $message[0];
