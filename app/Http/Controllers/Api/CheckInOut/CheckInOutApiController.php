@@ -721,7 +721,7 @@ class CheckInOutApiController extends ApiController
                 'hasCheckInPreviousDay' => ($checkInPreviousDay != null && !in_array(null, $checkInPreviousDay)) ? true : false,
                 'hasCheckedOutPreviousDay' => ($checkOutPreviousDay != null && !in_array(null, $checkOutPreviousDay)) ? true : false,
                 'hasCheckInToday' => $hasCheckInToday,
-                'message' => $this->attendanceMessage($success, $statusSuccess, $forgot, $statusForgot, $neither, $statusNeither, $message, $request)
+                //'message' => $this->attendanceMessage($success, $statusSuccess, $forgot, $statusForgot, $neither, $statusNeither, $message, $request)
             ] + $this->getMansionData($attendanceData);
         return response()->json($responseData);
     }
