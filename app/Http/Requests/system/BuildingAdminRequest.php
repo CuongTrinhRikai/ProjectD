@@ -41,7 +41,8 @@ class BuildingAdminRequest extends FormRequest
         if ($request->method() == "POST") {
             $validate = array_merge($validate, [
                 'username' => 'required|regex:/^\S*$/u|min:3|max:50|unique:building_admins,username',
-                'password' => ['required','confirmed','regex:/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*(_|[^\w])).{8,20}+$/'],
+                //'password' => ['required','confirmed','regex:/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*(_|[^\w])).{8,20}+$/'],
+                'password' => ['required','confirmed','regex:/^[0-9]{4,128}+$/'],
                 'password_confirmation' => 'required'
 //                'home_phone_number' => 'required|numeric|regex:/^(\+\d{1,3}[- ]?)?\d{10}$/',
 //                'mobile_number' => 'regex:/^(\+\d{1,3}[- ]?)?\d{11}$/|required|numeric|unique:building_admins,mobile_number',
